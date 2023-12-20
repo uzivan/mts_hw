@@ -10,23 +10,4 @@ public class Wolf extends Predator {
         super(name, bread, cost, character);
     }
 
-    @Override
-    public String getBread() {
-        return bread;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public BigDecimal getCost() {
-        return cost;
-    }
-
-    @Override
-    public String getCharacter() {
-        return character;
-    }
 }
