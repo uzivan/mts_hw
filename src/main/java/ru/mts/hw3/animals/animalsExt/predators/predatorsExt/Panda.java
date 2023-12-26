@@ -1,12 +1,14 @@
 package ru.mts.hw3.animals.animalsExt.predators.predatorsExt;
 
+import ru.mts.hw3.animals.AbstractAnimal;
 import ru.mts.hw3.animals.animalsExt.predators.Predator;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class Panda extends Predator {
-    public Panda(String name, String bread, BigDecimal cost, String character) {
-        super(name, bread, cost, character);
+    public Panda(String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
+        super(name, bread, cost, character, birthDate);
     }
 
     @Override
@@ -27,5 +29,20 @@ public class Panda extends Predator {
     @Override
     public String getCharacter() {
         return character;
+    }
+
+    @Override
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    @Override
+    public boolean equals(AbstractAnimal o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

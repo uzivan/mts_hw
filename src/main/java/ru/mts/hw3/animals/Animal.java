@@ -1,6 +1,7 @@
 package ru.mts.hw3.animals;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public interface Animal {
     /**
@@ -19,4 +20,10 @@ public interface Animal {
      * @return Character of animal
      */
     public String getCharacter();
+    /**
+     * @return birthdate of animal
+     */
+    public LocalDate getBirthDate();
+
+    boolean equals(AbstractAnimal o);
 }
