@@ -1,15 +1,16 @@
 package ru.mts.hw3;
 
-import ru.mts.hw3.animals.Animal;
-import ru.mts.hw3.factory.AnimalFactory;
-import ru.mts.hw3.factory.animalstypes.PetFactory;
-import ru.mts.hw3.factory.animalstypes.PredatorFactory;
+import ru.mts.hw3.domain.animals.Animal;
+import ru.mts.hw3.factory.BaseAnimalFactory;
+import ru.mts.hw3.factory.animalstypes.BasePetFactory;
+import ru.mts.hw3.factory.animalstypes.BasePredatorFactory;
 import ru.mts.hw3.services.hw4.create.CreateService;
 import ru.mts.hw3.services.hw4.create.CreateServiceImpl;
 import ru.mts.hw3.services.hw4.search.SearchService;
 import ru.mts.hw3.services.hw4.search.SearchServiceImpl;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Main {
 
@@ -28,9 +29,9 @@ public class Main {
         }
         System.out.println("------------------------------------------------------------------");
         CreateService animalService = new CreateServiceImpl(
-                new AnimalFactory(
-                        new PetFactory(),
-                        new PredatorFactory()));
+                new BaseAnimalFactory(
+                        new BasePetFactory(),
+                        new BasePredatorFactory()));
 
 
         System.out.println("animal created in createAnimals()");
@@ -55,7 +56,11 @@ public class Main {
             Animal[] concatAimals = new Animal[animals3.length + sameAnimals3.length];
             System.arraycopy(animals3, 0, concatAimals, 0, animals3.length);
             System.arraycopy(sameAnimals3, 0, concatAimals, animals3.length, sameAnimals3.length);
-            searchService.findDuplicate(concatAimals);
+
+            List<Animal> animalList = searchService.findDuplicate(concatAimals);
+            if(animalList.isEmpty()){
+                System.out.println("there are no publications");
+            }
         }
     }
 

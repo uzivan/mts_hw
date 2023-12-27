@@ -1,15 +1,19 @@
 package ru.mts.hw3.services.hw4.search;
 
-import ru.mts.hw3.animals.Animal;
+import ru.mts.hw3.domain.animals.Animal;
+import ru.mts.hw3.utils.ArrayUtils;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.*;
+
+import static ru.mts.hw3.utils.Preconditions.checkArgument;
 
 public class SearchServiceImpl implements SearchService{
 
     @Override
     public String[] findLeapYearNames(Animal[] animals) {
         checkDate(animals);
+
         String[] animalsReadyNames = Arrays.stream(animals).filter(animal -> animal.getBirthDate().isLeapYear()).map(animal -> animal.getName()).toArray(String[]::new);
         return animalsReadyNames;
     }
@@ -17,48 +21,45 @@ public class SearchServiceImpl implements SearchService{
     @Override
     public Animal[] findOlderAnimal(Animal[] animals, int nYears) {
         checkDate(animals);
-        if(nYears <=0){
-            throw new IllegalArgumentException("n should be more than 0");
-        }
-        LocalDate currentDateMinusNYears = LocalDate.now().minusYears(nYears);
+        checkArgument((nYears > 0), "n should be more then 0");
 
-        Animal[] animalsReady = Arrays.stream(animals).filter(animal -> animal.getBirthDate().isBefore(currentDateMinusNYears)).toArray(Animal[]::new);
+        final LocalDate currentDateMinusNYears = LocalDate.now().minusYears(nYears);
+
+        Animal[] animalsReady = Arrays.stream(animals)
+                .filter(animal -> animal.getBirthDate().isBefore(currentDateMinusNYears))
+                .toArray(Animal[]::new);
+
         return  animalsReady;
     }
 
     @Override
-    public void findDuplicate(Animal[] animals) {
-        if(animals == null){
-            throw new NullPointerException("animals[] must not be null");
-        }
-        boolean[] duplicates = new boolean[animals.length];
-        boolean isPrint;
-        for(int i = 0;i<animals.length;i++){
-            isPrint = true;
-            if(duplicates[i] == true){
-                continue;
+    public List<Animal> findDuplicate(Animal[] animals) {
+        checkArgument(ArrayUtils.isNotEmpty(animals), "animals[] must not be null");
+
+        List<Animal> result = new ArrayList<>();
+        Set<Animal> temp = new LinkedHashSet<>();
+        for (var a : animals) {
+            if (temp.contains(a)) {
+                result.add(a);
+                System.out.println(a);
+            } else {
+                temp.add(a);
             }
-            else {
-                for(int j = i+1; j< animals.length;j++){
-                    if(animals[i] == animals[j]){
-                        if(isPrint){
-                            System.out.println(animals[i]);
-                            isPrint = false;
-                        }
-                        duplicates[j] = true;
-                    }
-                }
-            }
+
         }
+
+        return result;
     }
 
-    public void checkDate(Animal[] animals){
-        if(animals == null){
-            throw new NullPointerException("animals[] must not be null");
+    public void checkDate(Animal[] animals) {
+        checkArgument(ArrayUtils.isNotEmpty(animals), "animals[] must not be empty");
+
+        if (Arrays.stream(animals)
+                .filter(Objects::nonNull)
+                .anyMatch(animal -> Objects.isNull(animal.getBirthDate()))) {
+
+            throw new IllegalArgumentException("birthdate id animals must not be null");
         }
-        boolean isAnyNull = Arrays.stream(animals).anyMatch(animal -> animal.getBirthDate() == null);
-        if(isAnyNull){
-            throw new NullPointerException("birthdate id animals must not be null");
-        }
+
     }
 }

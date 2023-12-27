@@ -1,13 +1,13 @@
 package ru.mts.hw3.services.hw3;
 
-import ru.mts.hw3.animals.Animal;
-import ru.mts.hw3.factory.AnimalFactory;
-import ru.mts.hw3.factory.Factory;
+import ru.mts.hw3.domain.animals.Animal;
+import ru.mts.hw3.factory.BaseAnimalFactory;
+import ru.mts.hw3.factory.SimpleFactory;
 
 public class CreateAnimalServiceImpl implements CreateAnimalService {
-    private final AnimalFactory animalFactory;
+    private final BaseAnimalFactory animalFactory;
 
-    public CreateAnimalServiceImpl(AnimalFactory animalFactory) {
+    public CreateAnimalServiceImpl(BaseAnimalFactory animalFactory) {
         this.animalFactory = animalFactory;
     }
 
@@ -27,7 +27,7 @@ public class CreateAnimalServiceImpl implements CreateAnimalService {
 
         int i = 0;
         for (; i < n; i++) {
-            animal = animalFactory.createAnimal(Factory.createAnimalType());
+            animal = animalFactory.createAnimal(SimpleFactory.createAnimalType());
         }
 
         return i;

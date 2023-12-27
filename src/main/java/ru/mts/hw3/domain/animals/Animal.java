@@ -1,9 +1,11 @@
-package ru.mts.hw3.animals;
+package ru.mts.hw3.domain.animals;
+
+import ru.mts.hw3.domain.Instance;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public interface Animal {
+public interface Animal extends Instance {
     /**
      * @return Bread of animal
      */

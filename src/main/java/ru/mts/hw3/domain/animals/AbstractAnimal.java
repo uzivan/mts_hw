@@ -1,4 +1,4 @@
-package ru.mts.hw3.animals;
+package ru.mts.hw3.domain.animals;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

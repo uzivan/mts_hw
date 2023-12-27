@@ -1,6 +1,6 @@
-package ru.mts.hw3.animals.animalsExt.predators;
+package ru.mts.hw3.domain.animals.animalsExt.predators;
 
-import ru.mts.hw3.animals.AbstractAnimal;
+import ru.mts.hw3.domain.animals.AbstractAnimal;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

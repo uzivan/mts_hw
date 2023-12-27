@@ -1,14 +1,14 @@
-package ru.mts.hw3.animals.animalsExt.pets.petsExt;
+package ru.mts.hw3.domain.animals.animalsExt.pets.petsExt;
 
-import ru.mts.hw3.animals.AbstractAnimal;
-import ru.mts.hw3.animals.animalsExt.pets.Pet;
+import ru.mts.hw3.domain.animals.AbstractAnimal;
+import ru.mts.hw3.domain.animals.animalsExt.pets.Pet;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class Dog extends Pet {
-    public Dog(String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
-        super(name, bread, cost, character, birthDate);
+public class Cat extends Pet {
+    public Cat(String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
+        super(name,bread, cost, character, birthDate);
     }
     @Override
     public String getBread() {

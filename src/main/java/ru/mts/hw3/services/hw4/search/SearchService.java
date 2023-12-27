@@ -1,6 +1,8 @@
 package ru.mts.hw3.services.hw4.search;
 
-import ru.mts.hw3.animals.Animal;
+import ru.mts.hw3.domain.animals.Animal;
+
+import java.util.List;
 
 public interface SearchService{
     /**
@@ -14,5 +16,5 @@ public interface SearchService{
     /**
      * @return animals that repeat
      */
-    void findDuplicate(Animal[] animals);
+    List<Animal> findDuplicate(Animal[] animals);
 }
