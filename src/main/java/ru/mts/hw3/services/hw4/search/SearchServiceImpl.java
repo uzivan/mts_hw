@@ -36,19 +36,24 @@ public class SearchServiceImpl implements SearchService{
     public List<Animal> findDuplicate(Animal[] animals) {
         checkArgument(ArrayUtils.isNotEmpty(animals), "animals[] must not be null");
 
-        List<Animal> result = new ArrayList<>();
+        Set<Animal> resultSet = new LinkedHashSet<>();
         Set<Animal> temp = new LinkedHashSet<>();
         for (var a : animals) {
             if (temp.contains(a)) {
-                result.add(a);
-                System.out.println(a);
+                resultSet.add(a);
+                //System.out.println(a);
             } else {
                 temp.add(a);
             }
-
         }
 
-        return result;
+        return new ArrayList<>(resultSet);
+    }
+
+    public void printDuplicates(List<Animal> animals) {
+        for(Animal animal: animals){
+            System.out.println(animal);
+        }
     }
 
     public void checkDate(Animal[] animals) {
