@@ -23,8 +23,8 @@ public class BasePredatorFactory {
         var cost = BigDecimal.valueOf(1 + (100 - 1) * random.nextDouble()).setScale(2, RoundingMode.HALF_UP);
         String character;
         LocalDate birthdate = SimpleFactory.createRandomLocalDate(
-                LocalDate.of(2020, 1, 1),
-                LocalDate.of(2022, 12, 31)
+                LocalDate.of(2019, 1, 1),
+                LocalDate.of(2024, 12, 31)
         );
 
         Predator predator = null;

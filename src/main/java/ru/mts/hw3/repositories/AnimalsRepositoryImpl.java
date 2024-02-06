@@ -1,17 +1,40 @@
-package ru.mts.hw3.services.hw4.search;
+package ru.mts.hw3.repositories;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import ru.mts.hw3.domain.animals.Animal;
+import ru.mts.hw3.services.hw5.CreateAnimalService;
 import ru.mts.hw3.utils.ArrayUtils;
+
+import javax.annotation.PostConstruct;
 
 import java.time.LocalDate;
 import java.util.*;
 
 import static ru.mts.hw3.utils.Preconditions.checkArgument;
 
-public class SearchServiceImpl implements SearchService{
+public class AnimalsRepositoryImpl implements AnimalsRepository {
+    private Animal[] animals;
+    private final ApplicationContext applicationContext;
+
+    public AnimalsRepositoryImpl(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    @PostConstruct
+    public void init() {
+        final int n = 5;
+
+        animals = new Animal[n];
+
+        for (int i = 0; i < n; i++) {
+            CreateAnimalService createAnimalService = applicationContext.getBean(CreateAnimalService.class);
+            animals[i] = createAnimalService.createAnimal();
+        }
+    }
 
     @Override
-    public String[] findLeapYearNames(Animal[] animals) {
+    public String[] findLeapYearNames() {
         checkDate(animals);
 
         String[] animalsReadyNames = Arrays.stream(animals).filter(animal -> animal.getBirthDate().isLeapYear()).map(animal -> animal.getName()).toArray(String[]::new);
@@ -19,7 +42,7 @@ public class SearchServiceImpl implements SearchService{
     }
 
     @Override
-    public Animal[] findOlderAnimal(Animal[] animals, int nYears) {
+    public Animal[] findOlderAnimal(int nYears) {
         checkDate(animals);
         checkArgument((nYears > 0), "n should be more then 0");
 
@@ -29,11 +52,11 @@ public class SearchServiceImpl implements SearchService{
                 .filter(animal -> animal.getBirthDate().isBefore(currentDateMinusNYears))
                 .toArray(Animal[]::new);
 
-        return  animalsReady;
+        return animalsReady;
     }
 
     @Override
-    public List<Animal> findDuplicate(Animal[] animals) {
+    public List<Animal> findDuplicate() {
         checkArgument(ArrayUtils.isNotEmpty(animals), "animals[] must not be null");
 
         Set<Animal> resultSet = new LinkedHashSet<>();
@@ -53,9 +76,10 @@ public class SearchServiceImpl implements SearchService{
 
         return animalList;
     }
+
     @Override
     public void printDuplicates(List<Animal> animals) {
-        for(Animal animal: animals){
+        for (Animal animal : animals) {
             System.out.println(animal);
         }
     }
@@ -70,5 +94,13 @@ public class SearchServiceImpl implements SearchService{
             throw new IllegalArgumentException("birthdate id animals must not be null");
         }
 
+    }
+
+    public Animal[] getAnimals() {
+        return animals;
+    }
+
+    public void setAnimals(Animal[] animals) {
+        this.animals = animals;
     }
 }

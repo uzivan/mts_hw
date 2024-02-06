@@ -1,5 +1,6 @@
 package ru.mts.hw3.factory;
 
+import org.springframework.context.ApplicationContext;
 import ru.mts.hw3.domain.animals.Animal;
 import ru.mts.hw3.enums.animals.AnimalType;
 import ru.mts.hw3.enums.animals.types.PetType;
@@ -7,7 +8,7 @@ import ru.mts.hw3.enums.animals.types.PredatorType;
 import ru.mts.hw3.factory.animalstypes.BasePetFactory;
 import ru.mts.hw3.factory.animalstypes.BasePredatorFactory;
 
-public class BaseAnimalFactory implements AnimalFactory{
+public class BaseAnimalFactory implements AnimalFactory {
 
     private final BasePetFactory petFactory;
     private final BasePredatorFactory predatorFactory;
@@ -18,9 +19,9 @@ public class BaseAnimalFactory implements AnimalFactory{
     }
 
     @Override
-    public Animal createAnimal(AnimalType animalType){
+    public Animal createAnimal(AnimalType animalType) {
         Animal animal = null;
-        switch (animalType){
+        switch (animalType) {
             case PET:
                 PetType petType = SimpleFactory.createPetType();
                 animal = petFactory.createPer(petType);
