@@ -1,12 +1,9 @@
 package ru.mts.hw3.repositories;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.ObjectProvider;
 import ru.mts.hw3.domain.animals.Animal;
-import ru.mts.hw3.services.hw5.CreateAnimalService;
+import ru.mts.hw3.services.hw6.CreateAnimalService;
 import ru.mts.hw3.utils.ArrayUtils;
-
-import javax.annotation.PostConstruct;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -14,31 +11,40 @@ import java.util.*;
 import static ru.mts.hw3.utils.Preconditions.checkArgument;
 
 public class AnimalsRepositoryImpl implements AnimalsRepository {
-    private Animal[] animals;
-    private final ApplicationContext applicationContext;
 
-    public AnimalsRepositoryImpl(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    private final ObjectProvider<CreateAnimalService> createAnimalServiceObjectProvider;
+
+    private Animal[] animals;
+
+    public AnimalsRepositoryImpl(ObjectProvider<CreateAnimalService> createAnimalServiceObjectProvider) {
+        this.createAnimalServiceObjectProvider = createAnimalServiceObjectProvider;
     }
 
-    @PostConstruct
     public void init() {
-        final int n = 5;
+        final int n = (Integer.MAX_VALUE / 100_000);
 
         animals = new Animal[n];
 
+        CreateAnimalService service;
         for (int i = 0; i < n; i++) {
-            CreateAnimalService createAnimalService = applicationContext.getBean(CreateAnimalService.class);
-            animals[i] = createAnimalService.createAnimal();
+            service = createAnimalServiceObjectProvider.getIfAvailable();
+            if (Objects.isNull(service)) {
+                throw new RuntimeException("Caramba!");
+            }
+
+            animals[i] = service.createAnimal();
         }
+
     }
 
     @Override
     public String[] findLeapYearNames() {
         checkDate(animals);
 
-        String[] animalsReadyNames = Arrays.stream(animals).filter(animal -> animal.getBirthDate().isLeapYear()).map(animal -> animal.getName()).toArray(String[]::new);
-        return animalsReadyNames;
+        return Arrays.stream(animals)
+                .filter(animal -> animal.getBirthDate().isLeapYear())
+                .map(Animal::getName)
+                .toArray(String[]::new);
     }
 
     @Override
@@ -48,15 +54,13 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
         final LocalDate currentDateMinusNYears = LocalDate.now().minusYears(nYears);
 
-        Animal[] animalsReady = Arrays.stream(animals)
+        return Arrays.stream(animals)
                 .filter(animal -> animal.getBirthDate().isBefore(currentDateMinusNYears))
                 .toArray(Animal[]::new);
-
-        return animalsReady;
     }
 
     @Override
-    public List<Animal> findDuplicate() {
+    public Set<Animal> findDuplicate() {
         checkArgument(ArrayUtils.isNotEmpty(animals), "animals[] must not be null");
 
         Set<Animal> resultSet = new LinkedHashSet<>();
@@ -70,15 +74,13 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
             }
         }
 
-        List<Animal> animalList = new ArrayList<>(resultSet);
+        printDuplicates(resultSet);
 
-        printDuplicates(animalList);
-
-        return animalList;
+        return resultSet;
     }
 
     @Override
-    public void printDuplicates(List<Animal> animals) {
+    public void printDuplicates(Collection<Animal> animals) {
         for (Animal animal : animals) {
             System.out.println(animal);
         }
@@ -96,11 +98,4 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
     }
 
-    public Animal[] getAnimals() {
-        return animals;
-    }
-
-    public void setAnimals(Animal[] animals) {
-        this.animals = animals;
-    }
 }
