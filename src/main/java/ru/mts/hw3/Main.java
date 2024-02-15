@@ -5,12 +5,15 @@ import ru.mts.hw3.config.ConfigurationApp;
 import ru.mts.hw3.domain.animals.Animal;
 import ru.mts.hw3.repositories.AnimalsRepository;
 
+
+
 public class Main {
 
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigurationApp.class);
-
         AnimalsRepository animalsRepository = context.getBean(AnimalsRepository.class);
+
+        System.out.println();
 
         System.out.println("рожденные в високосный год");
         String[] animalsFunc1 = animalsRepository.findLeapYearNames();

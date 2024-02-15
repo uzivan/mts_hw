@@ -1,9 +1,9 @@
 package ru.mts.hw3.repositories;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.ObjectProvider;
 import ru.mts.hw3.domain.animals.Animal;
-import ru.mts.hw3.services.hw5.CreateAnimalService;
+import ru.mts.hw3.services.hw6.CreateAnimalService;
 import ru.mts.hw3.utils.ArrayUtils;
 
 import javax.annotation.PostConstruct;
@@ -14,23 +14,30 @@ import java.util.*;
 import static ru.mts.hw3.utils.Preconditions.checkArgument;
 
 public class AnimalsRepositoryImpl implements AnimalsRepository {
-    private Animal[] animals;
-    private final ApplicationContext applicationContext;
 
-    public AnimalsRepositoryImpl(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    private final ObjectProvider<CreateAnimalService> createAnimalServiceObjectProvider;
+
+    private Animal[] animals;
+
+    public AnimalsRepositoryImpl(ObjectProvider<CreateAnimalService> createAnimalServiceObjectProvider) {
+        this.createAnimalServiceObjectProvider = createAnimalServiceObjectProvider;
     }
 
-    @PostConstruct
     public void init() {
-        final int n = 5;
+        final int n = (Integer.MAX_VALUE / 100_000_000);
 
         animals = new Animal[n];
 
+        CreateAnimalService service;
         for (int i = 0; i < n; i++) {
-            CreateAnimalService createAnimalService = applicationContext.getBean(CreateAnimalService.class);
-            animals[i] = createAnimalService.createAnimal();
+            service = createAnimalServiceObjectProvider.getIfAvailable();
+            if (Objects.isNull(service)) {
+                throw new RuntimeException("Caramba!");
+            }
+
+            animals[i] = service.createAnimal();
         }
+
     }
 
     @Override
@@ -56,7 +63,7 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
     }
 
     @Override
-    public List<Animal> findDuplicate() {
+    public Set<Animal> findDuplicate() {
         checkArgument(ArrayUtils.isNotEmpty(animals), "animals[] must not be null");
 
         Set<Animal> resultSet = new LinkedHashSet<>();
@@ -70,15 +77,13 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
             }
         }
 
-        List<Animal> animalList = new ArrayList<>(resultSet);
+        printDuplicates(resultSet);
 
-        printDuplicates(animalList);
-
-        return animalList;
+        return resultSet;
     }
 
     @Override
-    public void printDuplicates(List<Animal> animals) {
+    public void printDuplicates(Collection<Animal> animals) {
         for (Animal animal : animals) {
             System.out.println(animal);
         }

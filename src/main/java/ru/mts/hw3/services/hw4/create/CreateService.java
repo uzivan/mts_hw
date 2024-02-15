@@ -7,6 +7,7 @@ import ru.mts.hw3.factory.animalstypes.BasePetFactory;
 import ru.mts.hw3.factory.animalstypes.BasePredatorFactory;
 
 public interface CreateService {
+
     /**
      * @return randomly generated animals
      */
@@ -24,6 +25,8 @@ public interface CreateService {
 
             n++;
         }
+
         return animals;
     }
+
 }

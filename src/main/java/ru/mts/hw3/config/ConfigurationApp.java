@@ -1,6 +1,9 @@
 package ru.mts.hw3.config;
 
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
@@ -11,12 +14,13 @@ import ru.mts.hw3.factory.animalstypes.BasePetFactory;
 import ru.mts.hw3.factory.animalstypes.BasePredatorFactory;
 import ru.mts.hw3.repositories.AnimalsRepository;
 import ru.mts.hw3.repositories.AnimalsRepositoryImpl;
-import ru.mts.hw3.services.hw5.CreateAnimalService;
-import ru.mts.hw3.services.hw5.CreateAnimalServiceImpl;
+import ru.mts.hw3.services.hw6.CreateAnimalService;
+import ru.mts.hw3.services.hw6.CreateAnimalServiceImpl;
 
 
 @Configurable
 public class ConfigurationApp {
+
     @Bean
     public BasePetFactory basePetFactory() {
         return new BasePetFactory();
@@ -28,7 +32,8 @@ public class ConfigurationApp {
     }
 
     @Bean
-    public BaseAnimalFactory baseAnimalFactory(BasePetFactory basePetFactory, BasePredatorFactory basePredatorFactory) {
+    public BaseAnimalFactory baseAnimalFactory(@Autowired BasePetFactory basePetFactory,
+                                               @Autowired BasePredatorFactory basePredatorFactory) {
         return new BaseAnimalFactory(basePetFactory, basePredatorFactory);
     }
 
@@ -38,19 +43,20 @@ public class ConfigurationApp {
         return AnimalType.PET;
     }
 
-    @Bean
-    @Scope("prototype")
-    public CreateAnimalService createAnimalService(AnimalType animalType, BaseAnimalFactory baseAnimalFactory) {
-        return new CreateAnimalServiceImpl(animalType, baseAnimalFactory);
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @Bean(name = CreateAnimalService.NAME)
+    public CreateAnimalService createAnimalService(@Autowired BaseAnimalFactory baseAnimalFactory) {
+        return new CreateAnimalServiceImpl(baseAnimalFactory);
     }
 
-    @Bean
-    public AnimalsRepository animalsRepository(ApplicationContext applicationContext) {
-        return new AnimalsRepositoryImpl(applicationContext);
+    @Bean(initMethod = "init")
+    public AnimalsRepository animalsRepository(@Autowired ObjectProvider<CreateAnimalService> createAnimalServiceObjectProvider) {
+        return new AnimalsRepositoryImpl(createAnimalServiceObjectProvider);
     }
 
     @Bean
     public AnimalTypePostBeanProcessor animalTypePostBeanProcessor() {
         return new AnimalTypePostBeanProcessor();
     }
+
 }

@@ -5,6 +5,7 @@ import ru.mts.hw3.factory.BaseAnimalFactory;
 import ru.mts.hw3.factory.SimpleFactory;
 
 public class CreateServiceImpl implements CreateService {
+
     private final BaseAnimalFactory animalFactory;
 
     public CreateServiceImpl(BaseAnimalFactory animalFactory) {
@@ -36,4 +37,5 @@ public class CreateServiceImpl implements CreateService {
 
         return animals;
     }
+
 }
