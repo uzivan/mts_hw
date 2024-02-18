@@ -2,8 +2,12 @@ package ru.mts.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.*;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.util.ReflectionUtils;
 import ru.mts.bpp.AnimalTypePostBeanProcessor;
 import ru.mts.enums.animals.types.PetType;
 import ru.mts.enums.animals.types.PredatorType;
@@ -13,48 +17,43 @@ import ru.mts.factory.animalstypes.BasePredatorFactory;
 import ru.mts.services.CreateAnimalService;
 import ru.mts.services.CreateAnimalServiceImpl;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+@EnableConfigurationProperties(AnimalConfigurationProperties.class)
 @Configuration
 @PropertySource("classpath:application.properties")
 public class AutoConfiguration {
 
+    private final AnimalConfigurationProperties animalConfigurationProperties;
+
     @Autowired
-    private Environment environment;
+    public AutoConfiguration(AnimalConfigurationProperties animalConfigurationProperties) {
+        this.animalConfigurationProperties = animalConfigurationProperties;
+    }
 
     @Bean
     public BasePetFactory basePetFactory() {
-        BasePetFactory basePetFactory = new BasePetFactory();
+        Map<PetType, List<String>> namesMap = Arrays.stream(PetType.values())
+                .collect(Collectors.toUnmodifiableMap(
+                        Function.identity(),
+                        petType -> findNamesFromProperties(petType.getTitle())
+                ));
 
-        Map<PetType, String[]> namesMap = new HashMap<>();
-
-        for (PetType petType : PetType.values()) {
-            String[] names = getNamesFromProperties(petType.getTitle());
-
-            namesMap.put(petType, names);
-        }
-
-        basePetFactory.setNames(namesMap);
-
-        return basePetFactory;
+        return new BasePetFactory(namesMap);
     }
 
     @Bean
     public BasePredatorFactory basePredatorFactory() {
-        BasePredatorFactory basePredatorFactory = new BasePredatorFactory();
+        Map<PredatorType, List<String>> namesMap = Arrays.stream(PredatorType.values())
+                .collect(Collectors.toUnmodifiableMap(
+                        Function.identity(),
+                        petType -> findNamesFromProperties(petType.getTitle())
+                ));
 
-        Map<PredatorType, String[]> namesMap = new HashMap<>();
-
-        for (PredatorType predatorType : PredatorType.values()) {
-            String[] names = getNamesFromProperties(predatorType.getTitle());
-
-            namesMap.put(predatorType, names);
-        }
-
-        basePredatorFactory.setNames(namesMap);
-
-        return basePredatorFactory;
+        return new BasePredatorFactory(namesMap);
     }
 
     @Bean
@@ -74,15 +73,25 @@ public class AutoConfiguration {
         return new AnimalTypePostBeanProcessor();
     }
 
-    private String[] getNamesFromProperties(String title) {
-        final String prefix = "application.animal.";
-        final String suffix = ".name";
+    private List<String> findNamesFromProperties(String title) {
+        Field field = ReflectionUtils.findField(
+                AnimalConfigurationProperties.class,
+                String.format("%sNames", title),
+                List.class
+        );
 
-        String path = prefix + title + suffix;
+        if (Objects.nonNull(field)) {
+            ReflectionUtils.makeAccessible(field);
+            try {
+                //noinspection unchecked cast
+                return (List<String>) field.get(animalConfigurationProperties);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
 
-        String allNames = environment.getProperty("application.animal.wolf.name");
+        }
 
-        return allNames.split(",");
+        return Collections.emptyList();
     }
 
 }

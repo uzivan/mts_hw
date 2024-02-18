@@ -3,6 +3,7 @@ package ru.mts.enums;
 import java.util.Optional;
 
 public enum AnimalCharacter {
+
     HERBIVORE("can bite"),
     PREDATOR("can't bite");
 

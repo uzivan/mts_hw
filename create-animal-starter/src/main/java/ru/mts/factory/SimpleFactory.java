@@ -1,13 +1,11 @@
 package ru.mts.factory;
 
-
-
 import ru.mts.enums.animals.AnimalType;
 import ru.mts.enums.animals.types.PetType;
 import ru.mts.enums.animals.types.PredatorType;
 
 import java.time.LocalDate;
-import java.util.Random;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SimpleFactory {
@@ -22,7 +20,7 @@ public class SimpleFactory {
     }
 
     public static AnimalType createAnimalType() {
-        Random random = new Random();
+        var random = ThreadLocalRandom.current();
         AnimalType[] animalTypes = AnimalType.values();
         int num = random.nextInt(animalTypes.length);
 
@@ -30,7 +28,7 @@ public class SimpleFactory {
     }
 
     public static PetType createPetType() {
-        Random random = new Random();
+        var random = ThreadLocalRandom.current();
         PetType[] petTypes = PetType.values();
         int num = random.nextInt(petTypes.length);
 
@@ -38,18 +36,18 @@ public class SimpleFactory {
     }
 
     public static PredatorType createPredatorType() {
-        Random random = new Random();
+        var random = ThreadLocalRandom.current();
         PredatorType[] predatorTypes = PredatorType.values();
         int num = random.nextInt(predatorTypes.length);
 
         return predatorTypes[num];
     }
 
-    public static String chooseNameFromArray(String[] names) {
-        Random random = new Random();
-        int num = random.nextInt(names.length);
+    public static String chooseNameFromArray(List<String> names) {
+        var random = ThreadLocalRandom.current();
+        int num = random.nextInt(names.size());
 
-        return names[num];
+        return names.get(num);
     }
 
 }

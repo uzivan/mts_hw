@@ -1,30 +1,26 @@
 package ru.mts.scheduled;
 
-import java.text.SimpleDateFormat;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import ru.mts.config.ConfigApp;
 import ru.mts.domain.animals.Animal;
 import ru.mts.repositories.AnimalsRepository;
 
-@Component
-public class ScheduledTasks {
+import java.util.Set;
 
-    @Scheduled(fixedRate = 60000)
+@Component(ScheduledTasksMBean.NAME)
+public class ScheduledTasks implements ScheduledTasksMBean {
+
+    private final AnimalsRepository animalsRepository;
+
+    @Autowired
+    public ScheduledTasks(AnimalsRepository animalsRepository) {
+        this.animalsRepository = animalsRepository;
+    }
+
+    @Scheduled(fixedRate = 60_000)
+    @Override
     public void reportCurrentTime() {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigApp.class);
-        AnimalsRepository animalsRepository = context.getBean(AnimalsRepository.class);
-
-        System.out.println();
-
         System.out.println("рожденные в високосный год");
         String[] animalsFunc1 = animalsRepository.findLeapYearNames();
         for (int i = 0; i < animalsFunc1.length; i++) {

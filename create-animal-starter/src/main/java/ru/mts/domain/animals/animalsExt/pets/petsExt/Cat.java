@@ -1,16 +1,17 @@
 package ru.mts.domain.animals.animalsExt.pets.petsExt;
 
 
-import ru.mts.domain.animals.AbstractAnimal;
 import ru.mts.domain.animals.animalsExt.pets.Pet;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Cat extends Pet {
+
     public Cat(String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
-        super(name,bread, cost, character, birthDate);
+        super(name, bread, cost, character, birthDate);
     }
+
     @Override
     public String getBread() {
         return bread;
@@ -36,13 +37,4 @@ public class Cat extends Pet {
         return birthDate;
     }
 
-    @Override
-    public boolean equals(AbstractAnimal o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
 }

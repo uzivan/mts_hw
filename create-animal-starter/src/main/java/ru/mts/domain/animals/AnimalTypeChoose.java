@@ -4,6 +4,7 @@ package ru.mts.domain.animals;
 import ru.mts.enums.animals.AnimalType;
 
 public class AnimalTypeChoose<T> {
+
     private AnimalType animalType;
     private T heirType;
 
@@ -27,4 +28,5 @@ public class AnimalTypeChoose<T> {
     public void setHeirType(T heirType) {
         this.heirType = heirType;
     }
+
 }

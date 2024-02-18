@@ -1,8 +1,6 @@
 package ru.mts.factory;
 
 
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 import ru.mts.domain.animals.Animal;
 import ru.mts.enums.animals.AnimalType;
 import ru.mts.enums.animals.types.PetType;
@@ -22,7 +20,7 @@ public class BaseAnimalFactory implements AnimalFactory {
 
     @Override
     public Animal createAnimal(AnimalType animalType) {
-        Animal animal = null;
+        Animal animal;
         switch (animalType) {
             case PET:
                 PetType petType = SimpleFactory.createPetType();
@@ -39,6 +37,8 @@ public class BaseAnimalFactory implements AnimalFactory {
             default:
                 throw new UnsupportedOperationException("unsupported case");
         }
+
         return animal;
     }
+
 }
