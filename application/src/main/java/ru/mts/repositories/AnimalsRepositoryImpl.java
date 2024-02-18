@@ -1,10 +1,11 @@
 package ru.mts.repositories;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import ru.mts.domain.animals.Animal;
-import ru.mts.utils.ArrayUtils;
 import ru.mts.services.CreateAnimalService;
+import ru.mts.utils.ArrayUtils;
 import ru.mts.utils.Preconditions;
 
 import java.time.LocalDate;
@@ -81,9 +82,7 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
     @Override
     public void printDuplicates(Collection<Animal> animals) {
-        for (Animal animal : animals) {
-            System.out.println(animal);
-        }
+        System.out.println(StringUtils.join(animals, "\n"));
     }
 
     public void checkDate(Animal[] animals) {
