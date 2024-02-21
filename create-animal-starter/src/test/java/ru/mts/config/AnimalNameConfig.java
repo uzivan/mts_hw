@@ -19,7 +19,7 @@ import java.util.List;
 @ConfigurationProperties("animal")
 //@PropertySource(value = "classpath:application-test.yml")
 public class AnimalNameConfig {
-    private String cat;
+
     private List<String> catNames;
     private List<String> dogNames;
     private List<String> wolfNames;

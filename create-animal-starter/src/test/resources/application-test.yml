@@ -1,5 +1,4 @@
 animal:
-  cat: "name12345"
   catNames:
     - "catName1"
     - "catName2"
