@@ -8,6 +8,7 @@ import ru.mts.factory.SimpleFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import static ru.mts.enums.AnimalCharacter.HERBIVORE;
@@ -16,10 +17,10 @@ import static ru.mts.enums.AnimalCharacter.PREDATOR;
 
 public class BasePetFactory implements PetFactory {
 
-    private Map<PetType, String[]> names;
+    private Map<PetType, List<String>> names;
 
     @Override
-    public Pet createPer(PetType petType) {
+    public Pet createPet(PetType petType) {
         Random random = new Random();
 
         var name = SimpleFactory.chooseNameFromArray(names.get(petType));
@@ -54,11 +55,11 @@ public class BasePetFactory implements PetFactory {
         return pet;
     }
 
-    public Map<PetType, String[]> getNames() {
+    public Map<PetType, List<String>> getNames() {
         return names;
     }
 
-    public void setNames(Map<PetType, String[]> names) {
+    public void setNames(Map<PetType, List<String>> names) {
         this.names = names;
     }
 

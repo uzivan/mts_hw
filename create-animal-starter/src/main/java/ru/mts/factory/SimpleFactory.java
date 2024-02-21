@@ -7,6 +7,7 @@ import ru.mts.enums.animals.types.PetType;
 import ru.mts.enums.animals.types.PredatorType;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -45,11 +46,11 @@ public class SimpleFactory {
         return predatorTypes[num];
     }
 
-    public static String chooseNameFromArray(String[] names) {
+    public static String chooseNameFromArray(List<String> names) {
         Random random = new Random();
-        int num = random.nextInt(names.length);
+        int num = random.nextInt(names.size());
 
-        return names[num];
+        return names.get(num);
     }
 
 }

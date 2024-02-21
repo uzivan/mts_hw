@@ -74,8 +74,6 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
             }
         }
 
-        printDuplicates(resultSet);
-
         return resultSet;
     }
 

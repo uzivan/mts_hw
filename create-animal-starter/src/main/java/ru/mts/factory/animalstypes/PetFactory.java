@@ -6,5 +6,5 @@ import ru.mts.enums.animals.types.PetType;
 import ru.mts.factory.Factory;
 
 public interface PetFactory extends Factory {
-    public Pet createPer(PetType petType);
+    public Pet createPet(PetType petType);
 }

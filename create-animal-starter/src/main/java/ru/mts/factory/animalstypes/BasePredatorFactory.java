@@ -8,6 +8,7 @@ import ru.mts.factory.SimpleFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import static ru.mts.enums.AnimalCharacter.HERBIVORE;
@@ -16,7 +17,7 @@ import static ru.mts.enums.AnimalCharacter.PREDATOR;
 
 public class BasePredatorFactory {
 
-    private Map<PredatorType, String[]> names;
+    private Map<PredatorType, List<String>> names;
 
     public Predator createPredator(PredatorType predatorType){
         Random random = new Random();
@@ -53,11 +54,11 @@ public class BasePredatorFactory {
         return predator;
     }
 
-    public Map<PredatorType, String[]> getNames() {
+    public Map<PredatorType, List<String>> getNames() {
         return names;
     }
 
-    public void setNames(Map<PredatorType, String[]> names) {
+    public void setNames(Map<PredatorType, List<String>> names) {
         this.names = names;
     }
 

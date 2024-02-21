@@ -26,7 +26,7 @@ public class BaseAnimalFactory implements AnimalFactory {
         switch (animalType) {
             case PET:
                 PetType petType = SimpleFactory.createPetType();
-                animal = petFactory.createPer(petType);
+                animal = petFactory.createPet(petType);
 
                 break;
 

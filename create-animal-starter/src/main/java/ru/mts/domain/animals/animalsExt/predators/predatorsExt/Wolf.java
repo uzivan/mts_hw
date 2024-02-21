@@ -13,6 +13,7 @@ public class Wolf extends Predator {
     public Wolf(String name, String bread, BigDecimal cost, String character, LocalDate birthdate) {
         super(name, bread, cost, character, birthdate);
     }
+
     @Override
     public String getBread() {
         return bread;

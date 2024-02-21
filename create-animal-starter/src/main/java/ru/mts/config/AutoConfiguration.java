@@ -14,6 +14,7 @@ import ru.mts.services.CreateAnimalService;
 import ru.mts.services.CreateAnimalServiceImpl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -27,10 +28,10 @@ public class AutoConfiguration {
     public BasePetFactory basePetFactory() {
         BasePetFactory basePetFactory = new BasePetFactory();
 
-        Map<PetType, String[]> namesMap = new HashMap<>();
+        Map<PetType, List<String>> namesMap = new HashMap<>();
 
         for (PetType petType : PetType.values()) {
-            String[] names = getNamesFromProperties(petType.getTitle());
+            List<String> names = getNamesFromProperties(petType.getTitle());
 
             namesMap.put(petType, names);
         }
@@ -44,10 +45,10 @@ public class AutoConfiguration {
     public BasePredatorFactory basePredatorFactory() {
         BasePredatorFactory basePredatorFactory = new BasePredatorFactory();
 
-        Map<PredatorType, String[]> namesMap = new HashMap<>();
+        Map<PredatorType, List<String>> namesMap = new HashMap<>();
 
         for (PredatorType predatorType : PredatorType.values()) {
-            String[] names = getNamesFromProperties(predatorType.getTitle());
+            List<String> names = getNamesFromProperties(predatorType.getTitle());
 
             namesMap.put(predatorType, names);
         }
@@ -74,15 +75,15 @@ public class AutoConfiguration {
         return new AnimalTypePostBeanProcessor();
     }
 
-    private String[] getNamesFromProperties(String title) {
+    private List<String> getNamesFromProperties(String title) {
         final String prefix = "application.animal.";
         final String suffix = ".name";
 
         String path = prefix + title + suffix;
 
-        String allNames = environment.getProperty("application.animal.wolf.name");
+        String allNames = environment.getProperty(path);
 
-        return allNames.split(",");
+        return List.of(allNames.split(","));
     }
 
 }
