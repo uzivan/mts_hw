@@ -17,7 +17,11 @@ import static ru.mts.enums.AnimalCharacter.PREDATOR;
 
 public class BasePetFactory implements PetFactory {
 
-    private Map<PetType, List<String>> names;
+    private final Map<PetType, List<String>> names;
+
+    public BasePetFactory(Map<PetType, List<String>> names) {
+        this.names = names;
+    }
 
     @Override
     public Pet createPet(PetType petType) {
@@ -55,12 +59,6 @@ public class BasePetFactory implements PetFactory {
         return pet;
     }
 
-    public Map<PetType, List<String>> getNames() {
-        return names;
-    }
 
-    public void setNames(Map<PetType, List<String>> names) {
-        this.names = names;
-    }
 
 }

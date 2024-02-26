@@ -4,7 +4,7 @@ public enum PredatorType implements AnimalTypeSample{
     WOLF("wolf"),
     PANDA("panda");
 
-    private String title;
+    private final String title;
 
     PredatorType(String title) {
         this.title = title;

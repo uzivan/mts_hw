@@ -68,7 +68,6 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
         for (var a : animals) {
             if (temp.contains(a)) {
                 resultSet.add(a);
-                //System.out.println(a);
             } else {
                 temp.add(a);
             }
@@ -96,12 +95,5 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
     }
 
-    public Animal[] getAnimals() {
-        return animals;
-    }
-
-    public void setAnimals(Animal[] animals) {
-        this.animals = animals;
-    }
 
 }

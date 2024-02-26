@@ -38,13 +38,4 @@ public class Panda extends Predator {
         return birthDate;
     }
 
-    @Override
-    public boolean equals(AbstractAnimal o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
 }

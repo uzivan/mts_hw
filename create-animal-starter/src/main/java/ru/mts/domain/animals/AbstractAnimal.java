@@ -6,11 +6,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public abstract class AbstractAnimal implements Animal {
+
     protected String bread;
     protected String name;
     protected BigDecimal cost;
     protected String character;
     protected LocalDate birthDate;
+
     public AbstractAnimal(String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
         this.bread = bread;
         this.name = name;

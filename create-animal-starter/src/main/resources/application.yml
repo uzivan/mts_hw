@@ -1,0 +1,13 @@
+animal:
+  catNames:
+    - "catName1"
+    - "catName2"
+  dogNames:
+    - "dogName1"
+    - "dogName2"
+  wolfNames:
+    - "wolfName1"
+    - "wolfName2"
+  pandaNames:
+    - "pandaName1"
+    - "pandaName2"

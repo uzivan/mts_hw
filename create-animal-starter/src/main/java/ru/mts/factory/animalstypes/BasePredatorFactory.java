@@ -17,7 +17,11 @@ import static ru.mts.enums.AnimalCharacter.PREDATOR;
 
 public class BasePredatorFactory {
 
-    private Map<PredatorType, List<String>> names;
+    private final Map<PredatorType, List<String>> names;
+
+    public BasePredatorFactory(Map<PredatorType, List<String>> names) {
+        this.names = names;
+    }
 
     public Predator createPredator(PredatorType predatorType){
         Random random = new Random();
@@ -52,14 +56,6 @@ public class BasePredatorFactory {
                 throw new UnsupportedOperationException("unsupported case");
         }
         return predator;
-    }
-
-    public Map<PredatorType, List<String>> getNames() {
-        return names;
-    }
-
-    public void setNames(Map<PredatorType, List<String>> names) {
-        this.names = names;
     }
 
 }

@@ -23,12 +23,10 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(classes = ConfigApp.class)
 public class AnimalRepositoryTests {
     @Autowired
     private AnimalsRepository animalsRepository;
-
 
     @Nested
     public class findOlderAnimalTests {

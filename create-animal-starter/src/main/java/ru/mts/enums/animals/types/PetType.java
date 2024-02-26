@@ -4,7 +4,7 @@ public enum PetType implements AnimalTypeSample{
     CAT("cat"),
     DOG("dog");
 
-    private String title;
+    private final String title;
 
     PetType(String title) {
         this.title = title;
