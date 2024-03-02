@@ -11,18 +11,3 @@ animal:
   pandaNames:
     - "pandaName1Test"
     - "pandaName2Test"
-    -
-unexpected:
-  animal:
-    catNames:
-      - "badCatName1Test"
-      - "badCatName2Test"
-    dogNames:
-      - "badDogName1Test"
-      - "badDogName2Test"
-    wolfNames:
-      - "badWolfName1Test"
-      - "badWolfName2Test"
-    pandaNames:
-      - "badPandaName1Test"
-      - "badPandaName2Test"

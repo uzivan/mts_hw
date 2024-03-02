@@ -37,6 +37,7 @@ public class BasePetFactory implements PetFactory {
         );
 
         Pet pet = null;
+
         switch (petType) {
             case CAT:
                 character = PREDATOR.getDescription();
@@ -58,7 +59,5 @@ public class BasePetFactory implements PetFactory {
 
         return pet;
     }
-
-
 
 }

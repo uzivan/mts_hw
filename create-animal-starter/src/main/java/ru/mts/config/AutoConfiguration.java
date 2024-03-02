@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableConfigurationProperties(AnimalConfigurationProperties.class)
 public class AutoConfiguration {
+
     private final AnimalConfigurationProperties animalConfigurationProperties;
 
     @Autowired
@@ -78,7 +79,6 @@ public class AutoConfiguration {
         if (Objects.nonNull(field)) {
             ReflectionUtils.makeAccessible(field);
             try {
-                //System.out.println(field.get(animalConfigurationProperties));
                 //noinspection unchecked cast
                 return (List<String>) field.get(animalConfigurationProperties);
             } catch (IllegalAccessException e) {

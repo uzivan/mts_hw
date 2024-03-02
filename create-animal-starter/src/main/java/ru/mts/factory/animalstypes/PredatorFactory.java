@@ -6,5 +6,7 @@ import ru.mts.enums.animals.types.PredatorType;
 import ru.mts.factory.Factory;
 
 public interface PredatorFactory extends Factory {
+
     public Predator createPredator(PredatorType predatorType);
+
 }

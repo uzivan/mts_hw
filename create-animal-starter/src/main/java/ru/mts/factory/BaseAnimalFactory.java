@@ -39,6 +39,8 @@ public class BaseAnimalFactory implements AnimalFactory {
             default:
                 throw new UnsupportedOperationException("unsupported case");
         }
+
         return animal;
     }
+
 }

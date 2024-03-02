@@ -30,13 +30,13 @@ public class BasePredatorFactory {
         var bread = "bread_predator_";
         var cost = BigDecimal.valueOf(1 + (100 - 1) * random.nextDouble()).setScale(2, RoundingMode.HALF_UP);
         String character;
-
         LocalDate birthdate = SimpleFactory.createRandomLocalDate(
                 LocalDate.of(2019, 1, 1),
                 LocalDate.of(2024, 12, 31)
         );
 
         Predator predator = null;
+
         switch (predatorType){
             case WOLF:
                 character = HERBIVORE.getDescription();
@@ -55,6 +55,7 @@ public class BasePredatorFactory {
             default:
                 throw new UnsupportedOperationException("unsupported case");
         }
+
         return predator;
     }
 

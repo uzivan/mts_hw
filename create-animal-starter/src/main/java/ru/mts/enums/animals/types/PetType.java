@@ -1,6 +1,7 @@
 package ru.mts.enums.animals.types;
 
 public enum PetType implements AnimalTypeSample{
+
     CAT("cat"),
     DOG("dog");
 

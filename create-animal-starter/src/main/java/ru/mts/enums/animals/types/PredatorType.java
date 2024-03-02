@@ -1,6 +1,7 @@
 package ru.mts.enums.animals.types;
 
 public enum PredatorType implements AnimalTypeSample{
+
     WOLF("wolf"),
     PANDA("panda");
 
@@ -14,4 +15,5 @@ public enum PredatorType implements AnimalTypeSample{
     public String getTitle() {
         return title;
     }
+
 }

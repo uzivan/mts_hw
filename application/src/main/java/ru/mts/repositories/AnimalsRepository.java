@@ -24,4 +24,5 @@ public interface AnimalsRepository {
     Set<Animal> findDuplicate();
 
     void printDuplicates(Collection<Animal> animals);
+
 }

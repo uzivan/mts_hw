@@ -1,6 +1,7 @@
 package ru.mts.services;
 
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,11 +24,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.math.RoundingMode;
 
 
-@EnableConfigurationProperties({UnexpectedAnimalConfigurationProperties.class})
 @SpringBootTest(classes = {
         AnimalConfigurationProperties.class,
-        AutoConfiguration.class,
-        UnexpectedAnimalConfigurationProperties.class})
+        AutoConfiguration.class})
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = "spring.config.location=classpath:application-test.yml")
 public class CreateAnimalServiceTest {
@@ -36,68 +35,66 @@ public class CreateAnimalServiceTest {
     private CreateAnimalService createAnimalService;
     @Autowired
     private AnimalConfigurationProperties animalConfigurationProperties;
-    @Autowired
-    private UnexpectedAnimalConfigurationProperties unexpectedAnimalConfigurationProperties;
 
     @Nested
     @DisplayName("Tests names in map")
     public class testNames {
 
         @Test
-        @DisplayName("Test Cat, Dog, Panda, Wolf Names 1")
+        @DisplayName("Test Names 1")
         public void testPetName1() {
             Animal animal = createAnimalService.createAnimal();
 
             String actualName = animal.getName();
 
-            List<String> expectedNames = getExpectedCatDogPandaWolfNames();
+            List<String> expectedNames = getNamesByClass(animal);
 
-            List<String> notExpectedNames = getUnExpectedCatDogPandaWolfNames();
+            List<String> notExpectedNames = getUnExpectedNamesByClass(animal);
 
             assertTrue(expectedNames.contains(actualName));
             assertFalse(notExpectedNames.contains(actualName));
         }
 
         @Test
-        @DisplayName("Test Cat, Dog, Panda, Wolf Names 2")
+        @DisplayName("Test Names 2")
         public void testPetName2() {
             Animal animal = createAnimalService.createAnimal();
 
             String actualName = animal.getName();
 
-            List<String> expectedNames = getExpectedCatDogPandaWolfNames();
+            List<String> expectedNames = getNamesByClass(animal);
 
-            List<String> notExpectedNames = getUnExpectedCatDogPandaWolfNames();
+            List<String> notExpectedNames = getUnExpectedNamesByClass(animal);
 
             assertTrue(expectedNames.contains(actualName));
             assertFalse(notExpectedNames.contains(actualName));
         }
 
         @Test
-        @DisplayName("Test Cat, Dog, Panda, Wolf Names 3")
+        @DisplayName("Test Names 3")
         public void testPetName3() {
             Animal animal = createAnimalService.createAnimal();
 
             String actualName = animal.getName();
 
-            List<String> expectedNames = getExpectedCatDogPandaWolfNames();
+            List<String> expectedNames = getNamesByClass(animal);
 
-            List<String> notExpectedNames = getUnExpectedCatDogPandaWolfNames();
+            List<String> notExpectedNames = getUnExpectedNamesByClass(animal);
 
             assertTrue(expectedNames.contains(actualName));
             assertFalse(notExpectedNames.contains(actualName));
         }
 
         @Test
-        @DisplayName("Test Cat, Dog, Panda, Wolf Names 4")
+        @DisplayName("Test Names 4")
         public void testPetName4() {
             Animal animal = createAnimalService.createAnimal();
 
             String actualName = animal.getName();
 
-            List<String> expectedNames = getExpectedCatDogPandaWolfNames();
+            List<String> expectedNames = getNamesByClass(animal);
 
-            List<String> notExpectedNames = getUnExpectedCatDogPandaWolfNames();
+            List<String> notExpectedNames = getUnExpectedNamesByClass(animal);
 
             assertTrue(expectedNames.contains(actualName));
             assertFalse(notExpectedNames.contains(actualName));
@@ -106,8 +103,19 @@ public class CreateAnimalServiceTest {
     }
 
     @Nested
-    @DisplayName("Task for 1 task")
-    public class FirstTest {
+    @DisplayName("Equals animals tests")
+    public class EqualsTest {
+
+        private static List<String> testAnimals;
+
+        @BeforeAll
+        public static void init() {
+            testAnimals = new ArrayList<>();
+            testAnimals.add("Cat");
+            testAnimals.add("Dog");
+            testAnimals.add("Panda");
+            testAnimals.add("Wolf");
+        }
 
         @Test
         @DisplayName("Tests with same parameters")
@@ -115,10 +123,10 @@ public class CreateAnimalServiceTest {
             Animal animal1;
             Animal animal2;
 
-            for (int i = 0; i < 4; i++) {
-                animal1 = chooseAnimal(i, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+            for (String animalType: testAnimals) {
+                animal1 = chooseAnimal(animalType, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
-                animal2 = chooseAnimal(i, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                animal2 = chooseAnimal(animalType, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
 
                 assertEquals(animal1, animal2);
@@ -131,10 +139,10 @@ public class CreateAnimalServiceTest {
             Animal animal1;
             Animal animal2;
 
-            for (int i = 0; i < 4; i++) {
-                animal1 = chooseAnimal(i, "name_1", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+            for (String animalType: testAnimals) {
+                animal1 = chooseAnimal(animalType, "name_1", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
-                animal2 = chooseAnimal(i, "name_2", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                animal2 = chooseAnimal(animalType, "name_2", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
 
                 assertNotEquals(animal1, animal2);
@@ -147,10 +155,10 @@ public class CreateAnimalServiceTest {
             Animal animal1;
             Animal animal2;
 
-            for (int i = 0; i < 4; i++) {
-                animal1 = chooseAnimal(i, "name", "bread_1", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+            for (String animalType: testAnimals) {
+                animal1 = chooseAnimal(animalType, "name", "bread_1", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
-                animal2 = chooseAnimal(i, "name", "bread_2", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                animal2 = chooseAnimal(animalType, "name", "bread_2", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
 
                 assertNotEquals(animal1, animal2);
@@ -163,10 +171,10 @@ public class CreateAnimalServiceTest {
             Animal animal1;
             Animal animal2;
 
-            for (int i = 0; i < 4; i++) {
-                animal1 = chooseAnimal(i, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+            for (String animalType: testAnimals) {
+                animal1 = chooseAnimal(animalType, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
-                animal2 = chooseAnimal(i, "name", "bread", BigDecimal.valueOf(2).setScale(2, RoundingMode.HALF_UP),
+                animal2 = chooseAnimal(animalType, "name", "bread", BigDecimal.valueOf(2).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
 
                 assertNotEquals(animal1, animal2);
@@ -179,10 +187,10 @@ public class CreateAnimalServiceTest {
             Animal animal1;
             Animal animal2;
 
-            for (int i = 0; i < 4; i++) {
-                animal1 = chooseAnimal(i, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+            for (String animalType: testAnimals) {
+                animal1 = chooseAnimal(animalType, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character_1", LocalDate.of(2000, 1, 1));
-                animal2 = chooseAnimal(i, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                animal2 = chooseAnimal(animalType, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character_2", LocalDate.of(2000, 1, 1));
 
                 assertNotEquals(animal1, animal2);
@@ -195,10 +203,10 @@ public class CreateAnimalServiceTest {
             Animal animal1;
             Animal animal2;
 
-            for (int i = 0; i < 4; i++) {
-                animal1 = chooseAnimal(i, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+            for (String animalType: testAnimals) {
+                animal1 = chooseAnimal(animalType, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2000, 1, 1));
-                animal2 = chooseAnimal(i, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                animal2 = chooseAnimal(animalType, "name", "bread", BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                         "character", LocalDate.of(2001, 1, 1));
 
                 assertNotEquals(animal1, animal2);
@@ -207,39 +215,51 @@ public class CreateAnimalServiceTest {
 
     }
 
-    private Animal chooseAnimal(int number, String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
+    private Animal chooseAnimal(String animalType, String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
         Animal animal = null;
-        number = number % 4;
 
-        switch (number) {
-            case 0:
+        switch (animalType) {
+            case "Cat":
                 animal = new Cat(name, bread, cost, character, birthDate);
-            case 1:
+            case "Dog":
                 animal = new Dog(name, bread, cost, character, birthDate);
-            case 2:
+            case "Panda":
                 animal = new Panda(name, bread, cost, character, birthDate);
-            case 3:
+            case "Wolf":
                 animal = new Wolf(name, bread, cost, character, birthDate);
         }
+
         return animal;
     }
 
-    public List<String> getExpectedCatDogPandaWolfNames() {
-        List<String> names = new ArrayList<>();
-        names.addAll(animalConfigurationProperties.getDogNames());
-        names.addAll(animalConfigurationProperties.getCatNames());
-        names.addAll(animalConfigurationProperties.getWolfNames());
-        names.addAll(animalConfigurationProperties.getPandaNames());
-        return names;
+    private List<String> getNamesByClass(Animal animal) {
+        if(animal instanceof Cat){
+            return animalConfigurationProperties.getCatNames();
+        }else if (animal instanceof Dog){
+            return animalConfigurationProperties.getDogNames();
+        }else if (animal instanceof Panda){
+            return animalConfigurationProperties.getPandaNames();
+        }else if (animal instanceof Wolf){
+            return animalConfigurationProperties.getWolfNames();
+        }
+        else{
+            throw new RuntimeException("It is not Cat, Dog, Panda, Wolf");
+        }
     }
 
-    public List<String> getUnExpectedCatDogPandaWolfNames() {
-        List<String> names = new ArrayList<>();
-        names.addAll(unexpectedAnimalConfigurationProperties.getDogNames());
-        names.addAll(unexpectedAnimalConfigurationProperties.getCatNames());
-        names.addAll(unexpectedAnimalConfigurationProperties.getWolfNames());
-        names.addAll(unexpectedAnimalConfigurationProperties.getPandaNames());
-        return names;
+    private List<String> getUnExpectedNamesByClass(Animal animal) {
+        if(animal instanceof Cat){
+            return animalConfigurationProperties.getDogNames();
+        }else if (animal instanceof Dog){
+            return animalConfigurationProperties.getPandaNames();
+        }else if (animal instanceof Panda){
+            return animalConfigurationProperties.getWolfNames();
+        }else if (animal instanceof Wolf){
+            return animalConfigurationProperties.getCatNames();
+        }
+        else{
+            throw new RuntimeException("It is not Cat, Dog, Panda, Wolf");
+        }
     }
 }
 

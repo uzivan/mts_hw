@@ -8,9 +8,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Cat extends Pet {
+
     public Cat(String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
         super(name,bread, cost, character, birthDate);
     }
+
     @Override
     public String getBread() {
         return bread;

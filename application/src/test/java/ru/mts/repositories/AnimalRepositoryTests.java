@@ -28,8 +28,10 @@ public class AnimalRepositoryTests {
     @Autowired
     private AnimalsRepository animalsRepository;
 
+
     @Nested
     public class findOlderAnimalTests {
+
         @Test
         @DisplayName("Test for findOlderAnimal method")
         public void findOlderAnimalTest1() {
@@ -144,7 +146,9 @@ public class AnimalRepositoryTests {
             int negativeN = -5;
             assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOlderAnimal(negativeN));
         }
+
     }
+
 
     @Nested
     public class findLeapYearNamesTests {
@@ -210,6 +214,7 @@ public class AnimalRepositoryTests {
 
             Assertions.assertArrayEquals(expectedNames, actualNames);
         }
+
         @Test
         @DisplayName("Test for findLeapYearNames method with null input")
         public void findLeapYearNamesWithNullInputTest() {
@@ -233,6 +238,7 @@ public class AnimalRepositoryTests {
 
             assertThrows(IllegalArgumentException.class, () -> animalsRepository.findLeapYearNames());
         }
+
 
         @Nested
         public class findDuplicateTests {
@@ -318,7 +324,10 @@ public class AnimalRepositoryTests {
 
                 assertThrows(IllegalArgumentException.class, () -> animalsRepository.findDuplicate());
             }
+
         }
+
+
     }
 
     private LocalDate[] createRandomDate(int count){
@@ -390,4 +399,5 @@ public class AnimalRepositoryTests {
         }
         return animal;
     }
+
 }

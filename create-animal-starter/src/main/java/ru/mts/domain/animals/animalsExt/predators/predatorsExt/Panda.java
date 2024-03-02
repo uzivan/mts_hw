@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Panda extends Predator {
+
     public Panda(String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
         super(name, bread, cost, character, birthDate);
     }

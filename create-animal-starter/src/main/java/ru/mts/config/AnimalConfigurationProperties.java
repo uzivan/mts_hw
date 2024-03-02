@@ -12,6 +12,7 @@ import java.util.List;
 @Configuration
 @ConfigurationProperties("animal")
 public class AnimalConfigurationProperties {
+
     private List<String> catNames;
     private List<String> dogNames;
     private List<String> wolfNames;
