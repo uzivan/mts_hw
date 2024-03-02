@@ -2,10 +2,10 @@ package ru.mts.config;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
 import ru.mts.repositories.AnimalsRepository;
 import ru.mts.repositories.AnimalsRepositoryImpl;
 import ru.mts.services.CreateAnimalService;

@@ -51,4 +51,5 @@ public abstract class AbstractAnimal implements Animal {
         AbstractAnimal that = (AbstractAnimal) o;
         return Objects.equals(bread, that.bread) && Objects.equals(name, that.name) && Objects.equals(cost, that.cost) && Objects.equals(character, that.character) && Objects.equals(birthDate, that.birthDate);
     }
+
 }

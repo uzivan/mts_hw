@@ -1,10 +1,7 @@
 package ru.mts.factory;
 
 
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 import ru.mts.domain.animals.Animal;
-import ru.mts.enums.animals.AnimalType;
 import ru.mts.enums.animals.types.PetType;
 import ru.mts.enums.animals.types.PredatorType;
 import ru.mts.factory.animalstypes.BasePetFactory;
@@ -20,25 +17,20 @@ public class BaseAnimalFactory implements AnimalFactory {
         this.predatorFactory = predatorFactory;
     }
 
-    @Override
-    public Animal createAnimal(AnimalType animalType) {
+    public <T> Animal createAnimal(T animalType) {
         Animal animal = null;
-        switch (animalType) {
-            case PET:
-                PetType petType = SimpleFactory.createPetType();
-                animal = petFactory.createPet(petType);
 
-                break;
-
-            case PREDATOR:
-                PredatorType predatorType = SimpleFactory.createPredatorType();
-                animal = predatorFactory.createPredator(predatorType);
-
-                break;
-
-            default:
-                throw new UnsupportedOperationException("unsupported case");
+        if(animalType instanceof PetType) {
+            animal = petFactory.createPet((PetType) animalType);
         }
+        else if(animalType instanceof PredatorType) {
+            animal = predatorFactory.createPredator((PredatorType) animalType);
+        }
+        else {
+            throw new UnsupportedOperationException("unsupported case");
+        }
+
         return animal;
     }
+
 }

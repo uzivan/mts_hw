@@ -5,15 +5,16 @@ import ru.mts.domain.animals.animalsExt.pets.petsExt.Cat;
 import ru.mts.domain.animals.animalsExt.pets.petsExt.Dog;
 import ru.mts.enums.animals.types.PetType;
 import ru.mts.factory.SimpleFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
 import static ru.mts.enums.AnimalCharacter.HERBIVORE;
 import static ru.mts.enums.AnimalCharacter.PREDATOR;
-
 
 public class BasePetFactory implements PetFactory {
 
@@ -37,6 +38,7 @@ public class BasePetFactory implements PetFactory {
         );
 
         Pet pet = null;
+
         switch (petType) {
             case CAT:
                 character = PREDATOR.getDescription();
@@ -58,7 +60,5 @@ public class BasePetFactory implements PetFactory {
 
         return pet;
     }
-
-
 
 }

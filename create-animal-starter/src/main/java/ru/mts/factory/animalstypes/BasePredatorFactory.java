@@ -5,15 +5,16 @@ import ru.mts.domain.animals.animalsExt.predators.predatorsExt.Panda;
 import ru.mts.domain.animals.animalsExt.predators.predatorsExt.Wolf;
 import ru.mts.enums.animals.types.PredatorType;
 import ru.mts.factory.SimpleFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
 import static ru.mts.enums.AnimalCharacter.HERBIVORE;
 import static ru.mts.enums.AnimalCharacter.PREDATOR;
-
 
 public class BasePredatorFactory {
 
@@ -37,6 +38,7 @@ public class BasePredatorFactory {
         );
 
         Predator predator = null;
+
         switch (predatorType){
             case WOLF:
                 character = HERBIVORE.getDescription();
@@ -55,6 +57,7 @@ public class BasePredatorFactory {
             default:
                 throw new UnsupportedOperationException("unsupported case");
         }
+
         return predator;
     }
 

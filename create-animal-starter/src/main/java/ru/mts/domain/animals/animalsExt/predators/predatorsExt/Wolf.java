@@ -1,8 +1,5 @@
 package ru.mts.domain.animals.animalsExt.predators.predatorsExt;
 
-
-
-import ru.mts.domain.animals.AbstractAnimal;
 import ru.mts.domain.animals.animalsExt.predators.Predator;
 
 import java.math.BigDecimal;

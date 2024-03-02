@@ -1,7 +1,5 @@
 package ru.mts.factory;
 
-
-
 import ru.mts.enums.animals.AnimalType;
 import ru.mts.enums.animals.types.PetType;
 import ru.mts.enums.animals.types.PredatorType;

@@ -3,18 +3,18 @@ package ru.mts.repositories;
 
 import org.springframework.beans.factory.ObjectProvider;
 import ru.mts.domain.animals.Animal;
-import ru.mts.utils.ArrayUtils;
 import ru.mts.services.CreateAnimalService;
 import ru.mts.utils.Preconditions;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class AnimalsRepositoryImpl implements AnimalsRepository {
 
     private final ObjectProvider<CreateAnimalService> createAnimalServiceObjectProvider;
 
-    private Animal[] animals;
+    private Map<String, List<Animal>> animals;
 
     public AnimalsRepositoryImpl(ObjectProvider<CreateAnimalService> createAnimalServiceObjectProvider) {
         this.createAnimalServiceObjectProvider = createAnimalServiceObjectProvider;
@@ -23,57 +23,99 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
     public void init() {
         final int n = (Integer.MAX_VALUE / 100_000_000);
 
-        animals = new Animal[n];
-
-        CreateAnimalService service;
-        for (int i = 0; i < n; i++) {
-            service = createAnimalServiceObjectProvider.getIfAvailable();
-            if (Objects.isNull(service)) {
-                throw new RuntimeException("Caramba!");
-            }
-
-            animals[i] = service.createAnimal();
+        CreateAnimalService service = createAnimalServiceObjectProvider.getIfAvailable();
+        if (Objects.isNull(service)) {
+            throw new RuntimeException("Caramba!");
         }
 
+        animals = service.createAnimals(n);
     }
 
     @Override
-    public String[] findLeapYearNames() {
-        checkDate(animals);
+    public Map<String, LocalDate> findLeapYearNames() {
+        checkDateAndName(animals);
 
-        String[] animalsReadyNames = Arrays.stream(animals).filter(animal -> animal.getBirthDate().isLeapYear()).map(animal -> animal.getName()).toArray(String[]::new);
-        return animalsReadyNames;
+        Map<String, LocalDate> resultAnimals = new IdentityHashMap<>();
+
+        for (Map.Entry<String, List<Animal>> animalType : animals.entrySet()) {
+            List<Animal> animalsList = animalType.getValue();
+
+            for (Animal animal : animalsList) {
+                if (animal.getBirthDate().isLeapYear()) {
+                    String resultAnimalKey = new String(animalType.getKey() + " " + animal.getName());
+
+                    resultAnimals.put(resultAnimalKey, animal.getBirthDate());
+                }
+            }
+        }
+
+        return resultAnimals;
     }
 
     @Override
-    public Animal[] findOlderAnimal(int nYears) {
-        checkDate(animals);
-        Preconditions.checkArgument((nYears > 0), "n should be more then 0");
+    public Map<Animal, Integer> findOlderAnimal(int nYears) {
+        Preconditions.checkArgument(nYears > 0, "nYears most be more 0");
+        checkDateAndName(animals);
 
         final LocalDate currentDateMinusNYears = LocalDate.now().minusYears(nYears);
+        final LocalDate currentDate = LocalDate.now();
 
-        Animal[] animalsReady = Arrays.stream(animals)
-                .filter(animal -> animal.getBirthDate().isBefore(currentDateMinusNYears))
-                .toArray(Animal[]::new);
+        Animal oldestAnimal = null;
 
-        return animalsReady;
-    }
+        Map<Animal, Integer> resultAnimal = new HashMap<>();
 
-    @Override
-    public Set<Animal> findDuplicate() {
-        Preconditions.checkArgument(ArrayUtils.isNotEmpty(animals), "animals[] must not be null");
+        for (Map.Entry<String, List<Animal>> animalType : animals.entrySet()) {
+            List<Animal> animalsList = animalType.getValue();
 
-        Set<Animal> resultSet = new LinkedHashSet<>();
-        Set<Animal> temp = new LinkedHashSet<>();
-        for (var a : animals) {
-            if (temp.contains(a)) {
-                resultSet.add(a);
-            } else {
-                temp.add(a);
+            for (Animal animal : animalsList) {
+                if (animal.getBirthDate().isBefore(currentDateMinusNYears)) {
+                    resultAnimal.put(animal, (int) animal.getBirthDate().until(currentDate, ChronoUnit.YEARS));
+                }
+
+                if (Objects.isNull(oldestAnimal)) {
+                    oldestAnimal = animal;
+                } else if (oldestAnimal.getBirthDate().isAfter(animal.getBirthDate())) {
+                    oldestAnimal = animal;
+                }
             }
         }
 
-        return resultSet;
+        if (resultAnimal.isEmpty()) {
+            resultAnimal.put(oldestAnimal, (int) oldestAnimal.getBirthDate().until(currentDate, ChronoUnit.YEARS));
+        }
+
+        return resultAnimal;
+    }
+
+    @Override
+    public Map<String, Integer> findDuplicate() {
+        Preconditions.checkArgument(!Objects.isNull(animals), "Map of animals must not be empty");
+        Preconditions.checkArgument(!animals.isEmpty(), "Map of animals must not be empty");
+
+        Map<String, Integer> resultAnimals = new HashMap<>();
+        int countDuplicates;
+
+        for (Map.Entry<String, List<Animal>> animalMapElement : animals.entrySet()) {
+            List<Animal> animalList = animalMapElement.getValue();
+
+            countDuplicates = 0;
+
+            Set<Animal> resultSet = new LinkedHashSet<>();
+
+            for (var a : animalList) {
+                if(resultSet.contains(a)) {
+                    countDuplicates++;
+                } else {
+                    resultSet.add(a);
+                }
+            }
+
+            if(countDuplicates>0) {
+                resultAnimals.put(animalMapElement.getKey(), countDuplicates);
+            }
+        }
+
+        return resultAnimals;
     }
 
     @Override
@@ -83,17 +125,16 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
         }
     }
 
-    public void checkDate(Animal[] animals) {
-        Preconditions.checkArgument(ArrayUtils.isNotEmpty(animals), "animals[] must not be empty");
+    public void checkDateAndName(Map<String, List<Animal>> animals) {
+        Preconditions.checkArgument(!Objects.isNull(animals), "Map of animals must not be null");
+        Preconditions.checkArgument(!animals.isEmpty(), "Map of animals must not be empty");
 
-        if (Arrays.stream(animals)
-                .filter(Objects::nonNull)
-                .anyMatch(animal -> Objects.isNull(animal.getBirthDate()))) {
-
-            throw new IllegalArgumentException("birthdate id animals must not be null");
+        for(Map.Entry<String, List<Animal>> animalMapElement: animals.entrySet()) {
+            for(Animal animal: animalMapElement.getValue()) {
+                Preconditions.checkArgument(!Objects.isNull(animal.getBirthDate()), "birthdate id animals must not be null");
+                Preconditions.checkArgument(!Objects.isNull(animal.getName()), "name id animals must not be null");
+            }
         }
-
     }
-
 
 }

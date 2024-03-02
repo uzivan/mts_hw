@@ -1,10 +1,7 @@
 package ru.mts.repositories;
 
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.ReflectionUtils;
@@ -16,20 +13,30 @@ import ru.mts.domain.animals.animalsExt.predators.predatorsExt.Panda;
 import ru.mts.domain.animals.animalsExt.predators.predatorsExt.Wolf;
 
 import ru.mts.factory.SimpleFactory;
+
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest(classes = ConfigApp.class)
 public class AnimalRepositoryTests {
+
     @Autowired
     private AnimalsRepository animalsRepository;
+    @Autowired
+    private Map<String, Class<? extends Animal>> mapOfCorrespondenceBetweenNameAndClass;
+
 
     @Nested
     public class findOlderAnimalTests {
+
         @Test
         @DisplayName("Test for findOlderAnimal method")
         public void findOlderAnimalTest1() {
@@ -41,63 +48,66 @@ public class AnimalRepositoryTests {
                     LocalDate.now()
             };
 
-            int[] indexesOfExpectedAnimals = new int[]{1};
+            Map<Integer, Integer> expectedAnimalsIndices = new HashMap<>();
+            expectedAnimalsIndices.put(1, nYears);
 
-            Animal[] animals = createAnimalsWithGivenBirthDate(birthDates);
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(birthDates);
 
             setAnimalsToAnimalRepository(animals);
 
-            Animal[] expectedAnimals = createExpectedAnimalsFromIndexes(animals, indexesOfExpectedAnimals);
+            Map<Animal, Integer> actualAnimals = animalsRepository.findOlderAnimal(nYears);
 
-            Animal[] actualAnimals = animalsRepository.findOlderAnimal(nYears);
+            Map<Animal, Integer> expectedAnimals = createExpectedAnimalsFromIndexes(animals, expectedAnimalsIndices);
 
-            assertArrayEquals(expectedAnimals, actualAnimals);
+            assertEquals(expectedAnimals, actualAnimals);
         }
 
         @Test
         @DisplayName("Test for findOlderAnimal method")
         public void findOlderAnimalTest2() {
-            int nYears = 1;
+            int nYears = 4;
 
             LocalDate[] birthDates = new LocalDate[]{
-                    LocalDate.now().minusMonths(3),
-                    LocalDate.now()
+                    LocalDate.now().minusYears(nYears),
+                    LocalDate.now().minusYears(nYears).minusDays(1)
             };
 
-            int[] indexesOfExpectedAnimals = new int[]{};
+            Map<Integer, Integer> expectedAnimalsIndices = new HashMap<>();
+            expectedAnimalsIndices.put(1, nYears);
 
-            Animal[] animals = createAnimalsWithGivenBirthDate(birthDates);
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(birthDates);
 
             setAnimalsToAnimalRepository(animals);
 
-            Animal[] expectedAnimals = createExpectedAnimalsFromIndexes(animals, indexesOfExpectedAnimals);
+            Map<Animal, Integer> actualAnimals = animalsRepository.findOlderAnimal(nYears);
 
-            Animal[] actualAnimals = animalsRepository.findOlderAnimal(nYears);
+            Map<Animal, Integer> expectedAnimals = createExpectedAnimalsFromIndexes(animals, expectedAnimalsIndices);
 
-            Assertions.assertArrayEquals(expectedAnimals, actualAnimals);
+            assertEquals(expectedAnimals, actualAnimals);
         }
 
         @Test
-        @DisplayName("Test for findOlderAnimal method")
+        @DisplayName("Test for findOlderAnimal method with oldest Animal")
         public void findOlderAnimalTest3() {
             int nYears = 4;
 
             LocalDate[] birthDates = new LocalDate[]{
-                    LocalDate.now().minusYears(4),
-                    LocalDate.now().minusYears(4).minusDays(1)
+                    LocalDate.now().minusYears(nYears),
+                    LocalDate.now().minusYears(nYears).plusDays(1)
             };
 
-            int[] indexesOfExpectedAnimals = new int[]{1};
+            Map<Integer, Integer> expectedAnimalsIndices = new HashMap<>();
+            expectedAnimalsIndices.put(0, nYears);
 
-            Animal[] animals = createAnimalsWithGivenBirthDate(birthDates);
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(birthDates);
 
             setAnimalsToAnimalRepository(animals);
 
-            Animal[] expectedAnimals = createExpectedAnimalsFromIndexes(animals, indexesOfExpectedAnimals);
+            Map<Animal, Integer> actualAnimals = animalsRepository.findOlderAnimal(nYears);
 
-            Animal[] actualAnimals = animalsRepository.findOlderAnimal(nYears);
+            Map<Animal, Integer> expectedAnimals = createExpectedAnimalsFromIndexes(animals, expectedAnimalsIndices);
 
-            Assertions.assertArrayEquals(expectedAnimals, actualAnimals);
+            assertTrue(expectedAnimals.entrySet().containsAll(actualAnimals.entrySet()));
         }
 
         @Test
@@ -111,16 +121,49 @@ public class AnimalRepositoryTests {
         }
 
         @Test
+        @DisplayName("Test for findOlderAnimal method with empty input")
+        public void findOlderAnimalsWithEmptyInputTest() {
+            int nYears = 5;
+
+            setAnimalsToAnimalRepository(new HashMap<>());
+
+            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOlderAnimal(nYears));
+        }
+
+        @Test
         @DisplayName("Test for findOlderAnimal with null birthDay")
         public void findOlderAnimalsWithNullBirthDate() {
             int nYears = 5;
-            Animal[] animals = new Animal[]{
+            Map<String, List<Animal>> animals = new HashMap<>();
+            List<Animal> animalList = new ArrayList<>();
+            animalList.add(
                     new Dog("name",
                             "bread",
                             BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                             "character",
                             null)
-            };
+            );
+            animals.put("Dog", animalList);
+
+            setAnimalsToAnimalRepository(animals);
+
+            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOlderAnimal(nYears));
+        }
+
+        @Test
+        @DisplayName("Test for findOlderAnimal with null name")
+        public void findOlderAnimalsWithNullName() {
+            int nYears = 5;
+            Map<String, List<Animal>> animals = new HashMap<>();
+            List<Animal> animalList = new ArrayList<>();
+            animalList.add(
+                    new Dog(null,
+                            "bread",
+                            BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                            "character",
+                            LocalDate.of(1, 1, 1))
+            );
+            animals.put("Dog", animalList);
 
             setAnimalsToAnimalRepository(animals);
 
@@ -130,11 +173,16 @@ public class AnimalRepositoryTests {
         @Test
         @DisplayName("Test for findOlderAnimal method with incorrect N")
         public void findOlderAnimalsWithIncorrectN() {
-            int n = 5;
-
-            Animal[] animals = createAnimalsWithGivenBirthDate(
-                    createRandomDate(n)
+            Map<String, List<Animal>> animals = new HashMap<>();
+            List<Animal> animalList = new ArrayList<>();
+            animalList.add(
+                    new Dog("name",
+                            "bread",
+                            BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                            "character",
+                            LocalDate.of(1, 1, 1))
             );
+            animals.put("Dog", animalList);
 
             setAnimalsToAnimalRepository(animals);
 
@@ -144,7 +192,9 @@ public class AnimalRepositoryTests {
             int negativeN = -5;
             assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOlderAnimal(negativeN));
         }
+
     }
+
 
     @Nested
     public class findLeapYearNamesTests {
@@ -160,15 +210,20 @@ public class AnimalRepositoryTests {
                     LocalDate.of(2004, 1, 1)
             };
 
+            LocalDate[] expectedBirthDates = new LocalDate[]{
+                    LocalDate.of(2000, 1, 1),
+                    LocalDate.of(2004, 1, 1),
+            };
             String[] expectedNames = new String[]{"name_0", "name_4"};
+            Map<String, LocalDate> expectedMap = createExpectedMapWithNameAndDate(expectedBirthDates, expectedNames);
 
-            Animal[] animals = createAnimalsWithGivenBirthDate(birthDates);
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(birthDates);
 
             setAnimalsToAnimalRepository(animals);
 
-            String[] actualNames = animalsRepository.findLeapYearNames();
+            Map<String, LocalDate> actualMap = animalsRepository.findLeapYearNames();
 
-            Assertions.assertArrayEquals(expectedNames, actualNames);
+            assertTrue(equalsTwoIdentityMap(expectedMap, actualMap));
         }
 
         @Test
@@ -180,15 +235,20 @@ public class AnimalRepositoryTests {
                     LocalDate.of(1904, 1, 1)
             };
 
-            Animal[] animals = createAnimalsWithGivenBirthDate(birthDates);
+            LocalDate[] expectedBirthDates = new LocalDate[]{
+                    LocalDate.of(1600, 1, 1),
+                    LocalDate.of(1904, 1, 1)
+            };
+            String[] expectedNames = new String[]{"name_0", "name_2"};
+            Map<String, LocalDate> expectedMap = createExpectedMapWithNameAndDate(expectedBirthDates, expectedNames);
+
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(birthDates);
 
             setAnimalsToAnimalRepository(animals);
 
-            String[] expectedNames = new String[]{"name_0", "name_2"};
+            Map<String, LocalDate> actualMap = animalsRepository.findLeapYearNames();
 
-            String[] actualNames = animalsRepository.findLeapYearNames();
-
-            Assertions.assertArrayEquals(expectedNames, actualNames);
+            assertTrue(equalsTwoIdentityMap(expectedMap, actualMap));
         }
 
         @Test
@@ -200,16 +260,15 @@ public class AnimalRepositoryTests {
                     LocalDate.of(3, 1, 1)
             };
 
-            Animal[] animals = createAnimalsWithGivenBirthDate(birthDates);
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(birthDates);
 
             setAnimalsToAnimalRepository(animals);
 
-            String[] expectedNames = new String[0];
+            Map<String, LocalDate> actualMap = animalsRepository.findLeapYearNames();
 
-            String[] actualNames = animalsRepository.findLeapYearNames();
-
-            Assertions.assertArrayEquals(expectedNames, actualNames);
+            assertTrue(actualMap.isEmpty());
         }
+
         @Test
         @DisplayName("Test for findLeapYearNames method with null input")
         public void findLeapYearNamesWithNullInputTest() {
@@ -219,112 +278,162 @@ public class AnimalRepositoryTests {
         }
 
         @Test
-        @DisplayName("Test for findLeapYearNames method with null birthDate")
-        public void findLeapYearNamesWithNullDateTest() {
-            Animal[] animals = new Animal[]{
+        @DisplayName("Test for findLeapYearNames method with empty input")
+        public void findLeapYearNamesWithEmptyInputTest() {
+            setAnimalsToAnimalRepository(new HashMap<>());
+
+            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findLeapYearNames());
+        }
+
+        @Test
+        @DisplayName("Test for findLeapYearNames with null birthDay")
+        public void findLeapYearNamesWithNullBirthDate() {
+            Map<String, List<Animal>> animals = new HashMap<>();
+            List<Animal> animalList = new ArrayList<>();
+            animalList.add(
                     new Dog("name",
                             "bread",
                             BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                             "character",
                             null)
-            };
+            );
+            animals.put("Dog", animalList);
 
             setAnimalsToAnimalRepository(animals);
 
             assertThrows(IllegalArgumentException.class, () -> animalsRepository.findLeapYearNames());
         }
 
-        @Nested
-        public class findDuplicateTests {
+        @Test
+        @DisplayName("Test for findLeapYearNames with null name")
+        public void findLeapYearNamesWithNullName() {
+            Map<String, List<Animal>> animals = new HashMap<>();
+            List<Animal> animalList = new ArrayList<>();
+            animalList.add(
+                    new Dog(null,
+                            "bread",
+                            BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                            "character",
+                            LocalDate.of(1, 1, 1))
+            );
+            animals.put("Dog", animalList);
 
-            @Test
-            @DisplayName("Test for findDuplicate method")
-            public void findDuplicateTest1() {
-                int n = 5;
+            setAnimalsToAnimalRepository(animals);
 
-                Animal[] animals = createAnimalsWithGivenBirthDate(
-                        createRandomDate(n)
-                );
+            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findLeapYearNames());
+        }
 
-                Animal[] sameAnimals = Arrays.copyOfRange(animals, 0, 3);
+    }
 
-                Animal[] concatAnimals = new Animal[animals.length + sameAnimals.length];
-                System.arraycopy(animals, 0, concatAnimals, 0, animals.length);
-                System.arraycopy(sameAnimals, 0, concatAnimals, animals.length, sameAnimals.length);
 
-                setAnimalsToAnimalRepository(concatAnimals);
+    @Nested
+    public class findDuplicateTests {
 
-                Set<Animal> expectedAnimals = new HashSet<>(Arrays.asList(sameAnimals));
+        @Test
+        @DisplayName("Test for findDuplicate method")
+        public void findDuplicateTest1() {
+            int n = 5;
+            int nDuplicates1 = 3;
+            int nDuplicates2 = 1;
 
-                Set<Animal> actualAnimals = animalsRepository.findDuplicate();
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(
+                    createRandomDate(n)
+            );
+            createNDuplicates(animals, nDuplicates1);
+            createNDuplicates(animals, nDuplicates2);
 
-                assertTrue(actualAnimals.size() == expectedAnimals.size()
-                        && actualAnimals.containsAll(expectedAnimals)
-                        && expectedAnimals.containsAll(actualAnimals));
-            }
+            setAnimalsToAnimalRepository(animals);
 
-            @Test
-            @DisplayName("Test for findDuplicate method")
-            public void findDuplicateTest2() {
-                int n = 5;
+            Map<String, Integer> actualMap = animalsRepository.findDuplicate();
 
-                Animal[] animals = createAnimalsWithGivenBirthDate(
-                        createRandomDate(n)
-                );
+            Map<String, Integer> expectedMap = createMapWithTypesAndCountDuplicates(nDuplicates1 + nDuplicates2);
 
-                Animal[] sameAnimals1 = Arrays.copyOfRange(animals, 0, 3);
-                Animal[] sameAnimals2 = Arrays.copyOfRange(animals, 0, 1);
+            assertEquals(expectedMap, actualMap);
 
-                Animal[] concatAnimals = new Animal[animals.length + sameAnimals1.length + sameAnimals2.length];
-                System.arraycopy(animals, 0, concatAnimals, 0, animals.length);
-                System.arraycopy(sameAnimals1, 0, concatAnimals, animals.length, sameAnimals1.length);
-                System.arraycopy(sameAnimals2, 0, concatAnimals, animals.length + sameAnimals1.length, sameAnimals2.length);
+        }
 
-                setAnimalsToAnimalRepository(concatAnimals);
+        @Test
+        @DisplayName("Test for findDuplicate method")
+        public void findDuplicateTest2() {
+            int n = 5;
 
-                Set<Animal> expectedAnimals = new HashSet<>(Arrays.asList(sameAnimals1));
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(
+                    createRandomDate(n)
+            );
+            setAnimalsToAnimalRepository(animals);
 
-                Set<Animal> actualAnimals = animalsRepository.findDuplicate();
+            Map<String, Integer> actualMap = animalsRepository.findDuplicate();
 
-                assertTrue(actualAnimals.size() == expectedAnimals.size()
-                        && actualAnimals.containsAll(expectedAnimals)
-                        && expectedAnimals.containsAll(actualAnimals));
-            }
+            Map<String, Integer> expectedMap = new HashMap<>();
 
-            @Test
-            @DisplayName("Test for findDuplicate method")
-            public void findDuplicateTest3() {
-                int n = 5;
+            assertEquals(expectedMap, actualMap);
 
-                Animal[] animals = createAnimalsWithGivenBirthDate(
-                        createRandomDate(n)
-                );
+        }
 
-                setAnimalsToAnimalRepository(animals);
+        @Test
+        @DisplayName("Test for findDuplicate method")
+        public void findDuplicateTest3() {
+            int n = 5;
+            int nDuplicates = 3;
 
-                Set<Animal> expectedAnimals = new HashSet<>();
+            Map<String, List<Animal>> animals = createAnimalsWithGivenBirthDate(
+                    createRandomDate(n)
+            );
+            createNDuplicates(animals, nDuplicates);
 
-                Set<Animal> actualAnimals = animalsRepository.findDuplicate();
+            setAnimalsToAnimalRepository(animals);
 
-                assertTrue(actualAnimals.size() == expectedAnimals.size()
-                        && actualAnimals.containsAll(expectedAnimals)
-                        && expectedAnimals.containsAll(actualAnimals));
-            }
+            Map<String, Integer> actualMap = animalsRepository.findDuplicate();
 
-            @Test
-            @DisplayName("Test for findDuplicate method with null input")
-            public void findDuplicateWithNullInputTest() {
-                setAnimalsToAnimalRepository(null);
+            Map<String, Integer> expectedMap = createMapWithTypesAndCountDuplicates(nDuplicates);
 
-                assertThrows(IllegalArgumentException.class, () -> animalsRepository.findDuplicate());
+            assertEquals(expectedMap, actualMap);
+
+        }
+
+        @Test
+        @DisplayName("Test for findLeapYearNames method with null input")
+        public void findDuplicateWithNullInputTest() {
+            setAnimalsToAnimalRepository(null);
+
+            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findDuplicate());
+        }
+
+        @Test
+        @DisplayName("Test for findLeapYearNames method with empty input")
+        public void findDuplicateWithEmptyInputTest() {
+            setAnimalsToAnimalRepository(new HashMap<>());
+
+            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findDuplicate());
+        }
+
+    }
+
+    private Map<String, Integer> createMapWithTypesAndCountDuplicates(int count) {
+
+        Map<String, Integer> expectedMap = new HashMap<>();
+
+        for (String animalType : mapOfCorrespondenceBetweenNameAndClass.keySet()) {
+            expectedMap.put(animalType, count);
+        }
+
+        return expectedMap;
+    }
+
+    private void createNDuplicates(Map<String, List<Animal>> animals, int n) {
+        for (Map.Entry<String, List<Animal>> animalMapElement : animals.entrySet()) {
+            List<Animal> animalList = animalMapElement.getValue();
+
+            for (int i = 0; i < n; i++) {
+                animalList.add(animalList.get(i));
             }
         }
     }
 
-    private LocalDate[] createRandomDate(int count){
+    private LocalDate[] createRandomDate(int count) {
         LocalDate[] localDates = new LocalDate[count];
 
-        for(int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
             localDates[i] = SimpleFactory.createRandomLocalDate(
                     LocalDate.of(2022, 1, 1),
                     LocalDate.of(2022, 12, 31)
@@ -334,37 +443,95 @@ public class AnimalRepositoryTests {
         return localDates;
     }
 
-    private Animal[] createExpectedAnimalsFromIndexes(Animal[] animals, int[] indexes) {
-        Animal[] expectedAnimals = new Animal[indexes.length];
-
-        for (int i = 0; i < animals.length; i++) {
-            for (int j = 0; j < indexes.length; j++) {
-                if (i == indexes[j]) {
-                    expectedAnimals[j] = animals[indexes[j]];
+    private boolean equalsTwoIdentityMap(Map<String, LocalDate> map1, Map<String, LocalDate> map2) {
+        for (Map.Entry<String, LocalDate> map1Element : map1.entrySet()) {
+            for (Map.Entry<String, LocalDate> map2Element : map2.entrySet()) {
+                if (map1Element.getKey().equals(map2Element.getKey()) && map1Element.getValue().isEqual(map2Element.getValue())) {
+                    map2.remove(map2Element.getKey());
+                    break;
                 }
             }
         }
 
-        return expectedAnimals;
+        return map2.isEmpty();
     }
 
-    private Animal[] createAnimalsWithGivenBirthDate(LocalDate[] birthDate) {
-        Animal[] animals = new Animal[birthDate.length];
+    private Map<Animal, Integer> createExpectedAnimalsFromIndexes(Map<String, List<Animal>> animals, Map<Integer, Integer> animalIndices) {
+        Map<Animal, Integer> result = new HashMap<>();
 
-        for (int i = 0; i < birthDate.length; i++) {
-            animals[i] = chooseAnimal(i
-                    , "name_" + String.valueOf(i)
-                    , "bread_" + String.valueOf(i)
-                    , BigDecimal.valueOf(i).setScale(2, RoundingMode.HALF_UP)
-                    , "character_" + String.valueOf(i)
-                    , birthDate[i]);
+        for (Map.Entry<Integer, Integer> indicesMapElement : animalIndices.entrySet()) {
+            for (Map.Entry<String, List<Animal>> animalMapElement : animals.entrySet()) {
+                result.put(
+                        animalMapElement.getValue().get(indicesMapElement.getKey()),
+                        indicesMapElement.getValue()
+                );
+            }
         }
 
-        return animals;
+        return result;
     }
 
-    private void setAnimalsToAnimalRepository(Animal[] animals) {
-        Field field = ReflectionUtils.findField(animalsRepository.getClass(), "animals", Animal[].class);
+    private Map<String, LocalDate> createExpectedMapWithNameAndDate(LocalDate[] dates, String[] names) {
+        if (dates.length != names.length) {
+            throw new RuntimeException("Length of names not equals names length");
+        }
+
+        int length = dates.length;
+
+        Map<String, LocalDate> result = new IdentityHashMap<>();
+
+        for (String animalType : mapOfCorrespondenceBetweenNameAndClass.keySet()) {
+            for (int i = 0; i < length; i++) {
+                result.put(
+                        new String(animalType + " " + names[i]),
+                        dates[i]
+                );
+            }
+        }
+
+        return result;
+    }
+
+    private Map<String, List<Animal>> createAnimalsWithGivenBirthDate(LocalDate[] birthDate) {
+        Map<String, List<Animal>> animalMap = new HashMap<>();
+
+        for (Map.Entry<String, Class<? extends Animal>> animalType : mapOfCorrespondenceBetweenNameAndClass.entrySet()) {
+            List<Animal> animalList = new ArrayList<>();
+
+            for (int i = 0; i < birthDate.length; i++) {
+                try {
+                    Constructor<?> constructor = animalType.getValue().getDeclaredConstructor(
+                            String.class,
+                            String.class,
+                            BigDecimal.class,
+                            String.class,
+                            LocalDate.class
+                    );
+
+                    Animal animal = (Animal) constructor.newInstance(
+                            "name_" + String.valueOf(i)
+                            , animalType + "_bread_" + String.valueOf(i)
+                            , BigDecimal.valueOf(i).setScale(2, RoundingMode.HALF_UP)
+                            , "character_" + String.valueOf(i)
+                            , birthDate[i]
+                    );
+
+                    animalList.add(animal);
+                } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                         InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+
+            animalMap.put(animalType.getKey(), animalList);
+        }
+
+        return animalMap;
+    }
+
+    private void setAnimalsToAnimalRepository(Map<String, List<Animal>> animals) {
+        Field field = ReflectionUtils.findField(animalsRepository.getClass(), "animals", Map.class);
         if (Objects.isNull(field)) {
             throw new RuntimeException("Caramba, reflection not help");
         }
@@ -373,21 +540,4 @@ public class AnimalRepositoryTests {
         ReflectionUtils.setField(field, animalsRepository, animals);
     }
 
-    private Animal chooseAnimal(int number, String name, String bread, BigDecimal cost, String character, LocalDate birthDate) {
-        Animal animal = null;
-
-        number = number % 4;
-
-        switch (number) {
-            case 0:
-                animal = new Cat(name, bread, cost, character, birthDate);
-            case 1:
-                animal = new Dog(name, bread, cost, character, birthDate);
-            case 2:
-                animal = new Panda(name, bread, cost, character, birthDate);
-            case 3:
-                animal = new Wolf(name, bread, cost, character, birthDate);
-        }
-        return animal;
-    }
 }

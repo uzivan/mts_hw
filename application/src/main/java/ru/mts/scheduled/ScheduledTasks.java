@@ -1,6 +1,11 @@
 package ru.mts.scheduled;
 
+import java.security.Key;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,16 +38,16 @@ public class ScheduledTasks implements ScheduledTasksMBean {
     @Override
     public void reportCurrentTime() {
         log.info("рожденные в високосный год");
-        String[] animalsFunc1 = animalsRepository.findLeapYearNames();
+        Map<String, LocalDate> animalsFunc1 = animalsRepository.findLeapYearNames();
         log.info(StringUtils.join(animalsFunc1, "\n"));
 
         log.info("животные которые старше 1 года");
-        Animal[] animalsFunc2 = animalsRepository.findOlderAnimal(1);
+        Map<Animal, Integer> animalsFunc2 = animalsRepository.findOlderAnimal(1);
         log.info(StringUtils.join(animalsFunc2, "\n"));
 
         log.info("дубликаты");
-        Set<Animal> animalsFunc3 = animalsRepository.findDuplicate();
-        animalsRepository.printDuplicates(animalsFunc3);
+        Map<String, Integer> animalsFunc3 = animalsRepository.findDuplicate();
+        log.info(StringUtils.join(animalsFunc3, "\n"));
     }
 
 }

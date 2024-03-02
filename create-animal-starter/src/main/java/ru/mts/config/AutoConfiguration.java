@@ -5,7 +5,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.util.ReflectionUtils;
-import ru.mts.bpp.AnimalTypePostBeanProcessor;
+
+import ru.mts.domain.animals.Animal;
+import ru.mts.enums.animals.AnimalType;
+import ru.mts.enums.animals.types.AnimalTypeSample;
 import ru.mts.enums.animals.types.PetType;
 import ru.mts.enums.animals.types.PredatorType;
 import ru.mts.factory.BaseAnimalFactory;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableConfigurationProperties(AnimalConfigurationProperties.class)
 public class AutoConfiguration {
+
     private final AnimalConfigurationProperties animalConfigurationProperties;
 
     @Autowired
@@ -64,8 +68,22 @@ public class AutoConfiguration {
     }
 
     @Bean
-    public AnimalTypePostBeanProcessor animalTypePostBeanProcessor() {
-        return new AnimalTypePostBeanProcessor();
+    public Map<String, Class<? extends  Animal>> mapOfCorrespondenceBetweenNameAndClass() {
+        Map<String, Class<? extends Animal>> resultFunctionMap = new HashMap<>();
+
+        for(AnimalType animalType: AnimalType.values()) {
+            AnimalTypeSample[] animalHeirType = animalType.getAnimalTypeSamples();
+
+            for(AnimalTypeSample animalEnumExemplar: animalHeirType) {
+                resultFunctionMap.put(
+                        animalEnumExemplar.getName(),
+                        baseAnimalFactory(basePetFactory(), basePredatorFactory())
+                                .createAnimal(animalEnumExemplar).getClass()
+                        );
+            }
+        }
+
+        return resultFunctionMap;
     }
 
     private List<String> findNamesFromProperties(String title) {
@@ -78,7 +96,6 @@ public class AutoConfiguration {
         if (Objects.nonNull(field)) {
             ReflectionUtils.makeAccessible(field);
             try {
-                //System.out.println(field.get(animalConfigurationProperties));
                 //noinspection unchecked cast
                 return (List<String>) field.get(animalConfigurationProperties);
             } catch (IllegalAccessException e) {
