@@ -20,13 +20,11 @@ public class BaseAnimalFactory implements AnimalFactory {
     public <T> Animal createAnimal(T animalType) {
         Animal animal = null;
 
-        if(animalType instanceof PetType) {
+        if (animalType instanceof PetType) {
             animal = petFactory.createPet((PetType) animalType);
-        }
-        else if(animalType instanceof PredatorType) {
+        } else if (animalType instanceof PredatorType) {
             animal = predatorFactory.createPredator((PredatorType) animalType);
-        }
-        else {
+        } else {
             throw new UnsupportedOperationException("unsupported case");
         }
 

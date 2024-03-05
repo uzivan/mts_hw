@@ -1,6 +1,6 @@
 package ru.mts.enums.animals.types;
 
-public enum PredatorType implements AnimalTypeSample{
+public enum PredatorType implements AnimalTypeSample {
 
     WOLF("wolf", "Wolf"),
     PANDA("panda", "Panda");

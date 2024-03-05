@@ -33,8 +33,8 @@ public class BasePetFactory implements PetFactory {
         var cost = BigDecimal.valueOf(1 + (10 - 1) * random.nextDouble()).setScale(2, RoundingMode.HALF_UP);
         String character;
         LocalDate birthdate = SimpleFactory.createRandomLocalDate(
-                LocalDate.of(2022, 1, 1),
-                LocalDate.of(2022, 12, 31)
+                LocalDate.of(2018, 1, 1),
+                LocalDate.of(2024, 1, 1)
         );
 
         Pet pet = null;

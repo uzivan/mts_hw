@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import ru.mts.config.ConfigApp;
 import ru.mts.domain.animals.Animal;
 import ru.mts.repositories.AnimalsRepository;
+import ru.mts.services.CreateAnimalService;
 
 @Component(ScheduledTasksMBean.NAME)
 public class ScheduledTasks implements ScheduledTasksMBean {
@@ -28,10 +29,12 @@ public class ScheduledTasks implements ScheduledTasksMBean {
     public static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
 
     private final AnimalsRepository animalsRepository;
+    private final CreateAnimalService createAnimalService;
 
     @Autowired
-    public ScheduledTasks(AnimalsRepository animalsRepository) {
+    public ScheduledTasks(AnimalsRepository animalsRepository, CreateAnimalService createAnimalService) {
         this.animalsRepository = animalsRepository;
+        this.createAnimalService = createAnimalService;
     }
 
     @Scheduled(fixedRate = 60_000)
@@ -46,8 +49,23 @@ public class ScheduledTasks implements ScheduledTasksMBean {
         log.info(StringUtils.join(animalsFunc2, "\n"));
 
         log.info("дубликаты");
-        Map<String, Integer> animalsFunc3 = animalsRepository.findDuplicate();
+        Map<String, List<Animal>> animalsFunc3 = animalsRepository.findDuplicate();
         log.info(StringUtils.join(animalsFunc3, "\n"));
+
+        log.info("список котов");
+        List<Animal> animals = createAnimalService.createAnimals(10).get("Cat");
+        log.info(StringUtils.join(animals, "\n"));
+
+        log.info("средний возраст");
+        animalsRepository.findAverageAge(animals);
+
+        log.info("животные, возраст которых больше 5 лет и стоимость больше средней");
+        List<Animal> animalsFunc5 = animalsRepository.findOldAndExpensive(animals);
+        log.info(StringUtils.join(animalsFunc5, "\n"));
+
+        log.info("3 животных с самой низкой ценой отсортированные в алфавитном порядке");
+        List<Animal> animalsFunc6 = animalsRepository.findMinConstAnimal(animals);
+        log.info(StringUtils.join(animalsFunc6, "\n"));
     }
 
 }

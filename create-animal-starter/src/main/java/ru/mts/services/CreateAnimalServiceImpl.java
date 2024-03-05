@@ -22,13 +22,13 @@ public class CreateAnimalServiceImpl implements CreateAnimalService {
     public Map<String, List<Animal>> createAnimals(int n) {
         Map<String, List<Animal>> animalMap = new HashMap<>();
 
-        for(AnimalType animalType: AnimalType.values()) {
+        for (AnimalType animalType : AnimalType.values()) {
             AnimalTypeSample[] animalHeirType = animalType.getAnimalTypeSamples();
 
-            for(AnimalTypeSample animalEnumExemplar: animalHeirType) {
+            for (AnimalTypeSample animalEnumExemplar : animalHeirType) {
                 List<Animal> animalList = new ArrayList<>();
 
-                for(int i = 0; i < n;i++){
+                for (int i = 0; i < n; i++) {
                     animalList.add(baseAnimalFactory.createAnimal(animalEnumExemplar));
                 }
 

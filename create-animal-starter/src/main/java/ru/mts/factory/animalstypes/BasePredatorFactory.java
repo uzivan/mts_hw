@@ -24,7 +24,7 @@ public class BasePredatorFactory {
         this.names = names;
     }
 
-    public Predator createPredator(PredatorType predatorType){
+    public Predator createPredator(PredatorType predatorType) {
         Random random = new Random();
 
         var name = SimpleFactory.chooseNameFromArray(names.get(predatorType));
@@ -39,7 +39,7 @@ public class BasePredatorFactory {
 
         Predator predator = null;
 
-        switch (predatorType){
+        switch (predatorType) {
             case WOLF:
                 character = HERBIVORE.getDescription();
 

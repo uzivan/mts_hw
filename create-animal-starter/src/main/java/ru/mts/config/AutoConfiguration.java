@@ -68,18 +68,18 @@ public class AutoConfiguration {
     }
 
     @Bean
-    public Map<String, Class<? extends  Animal>> mapOfCorrespondenceBetweenNameAndClass() {
+    public Map<String, Class<? extends Animal>> mapOfCorrespondenceBetweenNameAndClass() {
         Map<String, Class<? extends Animal>> resultFunctionMap = new HashMap<>();
 
-        for(AnimalType animalType: AnimalType.values()) {
+        for (AnimalType animalType : AnimalType.values()) {
             AnimalTypeSample[] animalHeirType = animalType.getAnimalTypeSamples();
 
-            for(AnimalTypeSample animalEnumExemplar: animalHeirType) {
+            for (AnimalTypeSample animalEnumExemplar : animalHeirType) {
                 resultFunctionMap.put(
                         animalEnumExemplar.getName(),
                         baseAnimalFactory(basePetFactory(), basePredatorFactory())
                                 .createAnimal(animalEnumExemplar).getClass()
-                        );
+                );
             }
         }
 
