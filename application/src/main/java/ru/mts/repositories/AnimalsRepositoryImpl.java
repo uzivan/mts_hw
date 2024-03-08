@@ -47,7 +47,8 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                                 new String(entry.getKey() + " " + animal.getName()),
                                 animal.getBirthDate())))
                 .filter(animal -> animal.getValue().isLeapYear())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existingValue, newValue) -> existingValue, IdentityHashMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (existingValue, newValue) -> existingValue, IdentityHashMap::new));
 
     }
 
@@ -66,12 +67,18 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                 .sorted(Comparator.comparing(Animal::getBirthDate))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
                             Optional<Animal> firstAnimal = list.stream().findFirst();
+
                             if (firstAnimal.isPresent()) {
                                 if (firstAnimal.get().getBirthDate().isBefore(LocalDate.now().minusYears(nYears))) {
-                                    return list.stream().filter(animal -> animal.getBirthDate().isBefore(LocalDate.now().minusYears(nYears))).collect(Collectors.toMap(Function.identity(), (Animal animal) -> LocalDate.now().getYear() - animal.getBirthDate().getYear()));
+                                    return list.stream().filter(animal -> animal.getBirthDate()
+                                                    .isBefore(LocalDate.now().minusYears(nYears)))
+                                            .collect(Collectors.toMap(Function.identity(),
+                                                    (Animal animal) -> LocalDate.now().getYear() - animal.getBirthDate().getYear()));
                                 } else {
                                     Map<Animal, Integer> oldestAnimal = new HashMap<>();
+
                                     oldestAnimal.put(firstAnimal.get(), LocalDate.now().getYear() - firstAnimal.get().getBirthDate().getYear());
+
                                     return oldestAnimal;
                                 }
                             } else {
@@ -88,8 +95,9 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
         return animals.entrySet().stream()
                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
-                        entry.getValue().stream().collect(Collectors.groupingBy(Function.identity(),
-                                        Collectors.counting())).entrySet().stream()
+                        entry.getValue().stream()
+                                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                                .entrySet().stream()
                                 .filter(value -> value.getValue() > 1)
                                 .map(Map.Entry::getKey)
                                 .collect(Collectors.toList())))
@@ -126,13 +134,13 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                     Preconditions.checkArgument(!Objects.isNull(animal.getBirthDate()), "birthdate id animals must not be null");
                     Preconditions.checkArgument(!Objects.isNull(animal.getCost()), "cost id animals must not be null");
                 })
-                .filter(
-                        animal ->
-                        {
-                            BigDecimal average = animals.stream().map(Animal::getCost).collect(Collectors.collectingAndThen
-                                    (Collectors.reducing(BigDecimal.ZERO, BigDecimal::add), sum -> sum.divide(BigDecimal.valueOf(animals.size()), RoundingMode.HALF_UP)));
-                            return animal.getCost().compareTo(average) >= 0;
-                        })
+                .filter(animal -> {
+                    BigDecimal average = animals.stream().map(Animal::getCost).collect(Collectors.collectingAndThen(
+                            Collectors.reducing(BigDecimal.ZERO, BigDecimal::add),
+                            sum -> sum.divide(BigDecimal.valueOf(animals.size()), RoundingMode.HALF_UP)));
+
+                    return animal.getCost().compareTo(average) >= 0;
+                })
                 .filter(animal -> animal.getBirthDate().isBefore(LocalDate.now().minusYears(5)))
                 .collect(Collectors.toList());
     }
@@ -145,8 +153,11 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
         return animals.stream()
                 .peek(animal -> {
                     Preconditions.checkArgument(!Objects.isNull(animal.getCost()), "cost id animals must not be null");
+                    Preconditions.checkArgument(!Objects.isNull(animal.getName()), "name id animals must not be null");
                 })
-                .sorted(Comparator.comparing(Animal::getCost)).limit(3).sorted(Comparator.comparing(Animal::getName)).collect(Collectors.toList());
+                .sorted(Comparator.comparing(Animal::getCost))
+                .limit(3).sorted(Comparator.comparing(Animal::getName))
+                .collect(Collectors.toList());
     }
 
     public void checkDateAndName(Map<String, List<Animal>> animals) {
