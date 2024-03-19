@@ -13,6 +13,9 @@ import ru.mts.domain.animals.animalsExt.predators.predatorsExt.Panda;
 import ru.mts.domain.animals.animalsExt.predators.predatorsExt.Wolf;
 
 import ru.mts.factory.SimpleFactory;
+import ru.mts.utils.exceptions.IncorrectYearsException;
+import ru.mts.utils.exceptions.InvalidAnimalsSizeException;
+import ru.mts.utils.exceptions.NullAnimalFieldException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -150,7 +153,7 @@ public class AnimalRepositoryTests {
 
             setAnimalsToAnimalRepository(animals);
 
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOlderAnimal(nYears));
+            assertThrows(NullAnimalFieldException.class, () -> animalsRepository.findOlderAnimal(nYears));
         }
 
         @Test
@@ -170,7 +173,7 @@ public class AnimalRepositoryTests {
 
             setAnimalsToAnimalRepository(animals);
 
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOlderAnimal(nYears));
+            assertThrows(NullAnimalFieldException.class, () -> animalsRepository.findOlderAnimal(nYears));
         }
 
         @Test
@@ -190,10 +193,10 @@ public class AnimalRepositoryTests {
             setAnimalsToAnimalRepository(animals);
 
             int zeroN = 0;
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOlderAnimal(zeroN));
+            assertThrows(IncorrectYearsException.class, () -> animalsRepository.findOlderAnimal(zeroN));
 
             int negativeN = -5;
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOlderAnimal(negativeN));
+            assertThrows(IncorrectYearsException.class, () -> animalsRepository.findOlderAnimal(negativeN));
         }
 
     }
@@ -305,7 +308,7 @@ public class AnimalRepositoryTests {
 
             setAnimalsToAnimalRepository(animals);
 
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findLeapYearNames());
+            assertThrows(NullAnimalFieldException.class, () -> animalsRepository.findLeapYearNames());
         }
 
         @Test
@@ -324,7 +327,7 @@ public class AnimalRepositoryTests {
 
             setAnimalsToAnimalRepository(animals);
 
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findLeapYearNames());
+            assertThrows(NullAnimalFieldException.class, () -> animalsRepository.findLeapYearNames());
         }
 
     }
@@ -561,7 +564,7 @@ public class AnimalRepositoryTests {
                             LocalDate.of(1, 1, 1))
             );
 
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOldAndExpensive(animals));
+            assertThrows(NullAnimalFieldException.class, () -> animalsRepository.findOldAndExpensive(animals));
         }
 
         @Test
@@ -576,7 +579,7 @@ public class AnimalRepositoryTests {
                             null)
             );
 
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findOldAndExpensive(animals));
+            assertThrows(NullAnimalFieldException.class, () -> animalsRepository.findOldAndExpensive(animals));
         }
     }
 
@@ -608,7 +611,12 @@ public class AnimalRepositoryTests {
             for (String animalType : mapOfCorrespondenceBetweenNameAndClass.keySet()) {
                 List<Animal> expectedAnimals = createExpectedAnimalsFromIndexes(animals.get(animalType), indexesExpectedAnimals);
 
-                List<Animal> actualAnimals = animalsRepository.findMinConstAnimal(animals.get(animalType));
+                List<Animal> actualAnimals = null;
+                try {
+                    actualAnimals = animalsRepository.findMinConstAnimal(animals.get(animalType));
+                } catch (InvalidAnimalsSizeException e) {
+                    throw new RuntimeException(e);
+                }
 
                 assertEquals(expectedAnimals, actualAnimals);
             }
@@ -620,18 +628,25 @@ public class AnimalRepositoryTests {
             BigDecimal[] costs = new BigDecimal[]{
                     BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
                     BigDecimal.valueOf(3).setScale(2, RoundingMode.HALF_UP),
+                    BigDecimal.valueOf(3).setScale(2, RoundingMode.HALF_UP)
             };
             String[] names = new String[]{
                     "a_name",
                     "b_name",
+                    "c_name"
             };
-            Integer[] indexesExpectedAnimals = new Integer[]{0, 1};
+            Integer[] indexesExpectedAnimals = new Integer[]{0, 1, 2};
             Map<String, List<Animal>> animals = createAnimalsWithGivenCostAndName(costs, names);
 
             for (String animalType : mapOfCorrespondenceBetweenNameAndClass.keySet()) {
                 List<Animal> expectedAnimals = createExpectedAnimalsFromIndexes(animals.get(animalType), indexesExpectedAnimals);
 
-                List<Animal> actualAnimals = animalsRepository.findMinConstAnimal(animals.get(animalType));
+                List<Animal> actualAnimals = null;
+                try {
+                    actualAnimals = animalsRepository.findMinConstAnimal(animals.get(animalType));
+                } catch (InvalidAnimalsSizeException e) {
+                    throw new RuntimeException(e);
+                }
 
                 assertEquals(expectedAnimals, actualAnimals);
             }
@@ -659,7 +674,12 @@ public class AnimalRepositoryTests {
             for (String animalType : mapOfCorrespondenceBetweenNameAndClass.keySet()) {
                 List<Animal> expectedAnimals = createExpectedAnimalsFromIndexes(animals.get(animalType), indexesExpectedAnimals);
 
-                List<Animal> actualAnimals = animalsRepository.findMinConstAnimal(animals.get(animalType));
+                List<Animal> actualAnimals = null;
+                try {
+                    actualAnimals = animalsRepository.findMinConstAnimal(animals.get(animalType));
+                } catch (InvalidAnimalsSizeException e) {
+                    throw new RuntimeException(e);
+                }
 
                 assertEquals(expectedAnimals, actualAnimals);
             }
@@ -685,6 +705,8 @@ public class AnimalRepositoryTests {
         @DisplayName("Test for findMinConstAnimal with null costs")
         public void findMinConstAnimalTest6() {
             List<Animal> animals = new ArrayList<>();
+            animals.add(createOrdinaryDog());
+            animals.add(createOrdinaryDog());
             animals.add(
                     new Dog("name",
                             "bread",
@@ -693,13 +715,15 @@ public class AnimalRepositoryTests {
                             LocalDate.of(1, 1, 1))
             );
 
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findMinConstAnimal(animals));
+            assertThrows(NullAnimalFieldException.class, () -> animalsRepository.findMinConstAnimal(animals));
         }
 
         @Test
         @DisplayName("Test for findMinConstAnimal with null name")
         public void findMinConstAnimalTest7() {
             List<Animal> animals = new ArrayList<>();
+            animals.add(createOrdinaryDog());
+            animals.add(createOrdinaryDog());
             animals.add(
                     new Dog(null,
                             "bread",
@@ -708,9 +732,34 @@ public class AnimalRepositoryTests {
                             LocalDate.of(1, 1, 1))
             );
 
-            assertThrows(IllegalArgumentException.class, () -> animalsRepository.findMinConstAnimal(animals));
+            assertThrows(NullAnimalFieldException.class, () -> animalsRepository.findMinConstAnimal(animals));
         }
 
+        @Test
+        @DisplayName("Test for findMinConstAnimal with incorrect animals size")
+        public void findMinConstAnimalTest8() {
+            List<Animal> animals = new ArrayList<>();
+            animals.add(
+                    new Dog("name1",
+                            "bread",
+                            BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                            "character",
+                            LocalDate.of(1, 1, 1))
+            );
+            animals.add(
+                    new Dog("name2",
+                            "bread",
+                            BigDecimal.valueOf(1).setScale(2, RoundingMode.HALF_UP),
+                            "character",
+                            LocalDate.of(1, 1, 1))
+            );
+            assertThrows(InvalidAnimalsSizeException.class, () -> animalsRepository.findMinConstAnimal(animals));
+        }
+
+    }
+
+    private Animal createOrdinaryDog() {
+        return new Dog("name", "bread",BigDecimal.valueOf(1), "character" ,LocalDate.of(1, 1, 1));
     }
 
     private Map<String, List<Animal>> createAnimalsWithDateAndCost(BigDecimal[] costs, LocalDate[] birthDate) {

@@ -1,6 +1,7 @@
 package ru.mts.repositories;
 
 import ru.mts.domain.animals.Animal;
+import ru.mts.utils.exceptions.InvalidAnimalsSizeException;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -36,6 +37,6 @@ public interface AnimalsRepository {
     /**
      * @return 3 animals with the lowest cost
      */
-    public List<Animal> findMinConstAnimal(List<Animal> animals);
+    public List<Animal> findMinConstAnimal(List<Animal> animals) throws InvalidAnimalsSizeException;
 
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import ru.mts.domain.animals.Animal;
 import ru.mts.services.CreateAnimalService;
 import ru.mts.utils.Preconditions;
+import ru.mts.utils.exceptions.InvalidAnimalsSizeException;
 
 import javax.swing.*;
 import java.math.BigDecimal;
@@ -54,15 +55,15 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
     @Override
     public Map<Animal, Integer> findOlderAnimal(int nYears) {
-        Preconditions.checkArgument(nYears > 0, "nYears most be more 0");
+        Preconditions.checkYears(nYears > 0);
         Preconditions.checkArgument(!Objects.isNull(animals), "Map of animals must not be null");
         Preconditions.checkArgument(!animals.isEmpty(), "Map of animals must not be empty");
 
         return animals.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
                 .peek(animal -> {
-                    Preconditions.checkArgument(!Objects.isNull(animal.getBirthDate()), "birthdate id animals must not be null");
-                    Preconditions.checkArgument(!Objects.isNull(animal.getName()), "name id animals must not be null");
+                    Preconditions.checkAnimalField(!Objects.isNull(animal.getBirthDate()), "Birthdate");
+                    Preconditions.checkAnimalField(!Objects.isNull(animal.getName()), "Name");
                 })
                 .sorted(Comparator.comparing(Animal::getBirthDate))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
@@ -118,7 +119,7 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
         animals.stream()
                 .peek(animal -> {
-                    Preconditions.checkArgument(!Objects.isNull(animal.getBirthDate()), "birthdate id animals must not be null");
+                    Preconditions.checkAnimalField(!Objects.isNull(animal.getBirthDate()), "Birthdate");
                 })
                 .map(animal -> LocalDate.now().getYear() - animal.getBirthDate().getYear())
                 .mapToInt(e -> e).average().stream().forEach(System.out::println);
@@ -131,8 +132,8 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
         return animals.stream()
                 .peek(animal -> {
-                    Preconditions.checkArgument(!Objects.isNull(animal.getBirthDate()), "birthdate id animals must not be null");
-                    Preconditions.checkArgument(!Objects.isNull(animal.getCost()), "cost id animals must not be null");
+                    Preconditions.checkAnimalField(!Objects.isNull(animal.getBirthDate()), "Birthdate");
+                    Preconditions.checkAnimalField(!Objects.isNull(animal.getCost()), "Cost");
                 })
                 .filter(animal -> {
                     BigDecimal average = animals.stream().map(Animal::getCost).collect(Collectors.collectingAndThen(
@@ -146,14 +147,15 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
     }
 
     @Override
-    public List<Animal> findMinConstAnimal(List<Animal> animals) {
+    public List<Animal> findMinConstAnimal(List<Animal> animals) throws InvalidAnimalsSizeException {
         Preconditions.checkArgument(!Objects.isNull(animals), "List of animals must not be null");
         Preconditions.checkArgument(!animals.isEmpty(), "List of animals must not be empty");
+        Preconditions.checkAnimalList(animals.size() >= 3);
 
         return animals.stream()
                 .peek(animal -> {
-                    Preconditions.checkArgument(!Objects.isNull(animal.getCost()), "cost id animals must not be null");
-                    Preconditions.checkArgument(!Objects.isNull(animal.getName()), "name id animals must not be null");
+                    Preconditions.checkAnimalField(!Objects.isNull(animal.getCost()), "Cost");
+                    Preconditions.checkAnimalField(!Objects.isNull(animal.getName()), "Name");
                 })
                 .sorted(Comparator.comparing(Animal::getCost))
                 .limit(3).sorted(Comparator.comparing(Animal::getName))
@@ -166,8 +168,8 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
         for (Map.Entry<String, List<Animal>> animalMapElement : animals.entrySet()) {
             for (Animal animal : animalMapElement.getValue()) {
-                Preconditions.checkArgument(!Objects.isNull(animal.getBirthDate()), "birthdate id animals must not be null");
-                Preconditions.checkArgument(!Objects.isNull(animal.getName()), "name id animals must not be null");
+                Preconditions.checkAnimalField(!Objects.isNull(animal.getBirthDate()), "Birthdate");
+                Preconditions.checkAnimalField(!Objects.isNull(animal.getName()), "Name");
             }
         }
     }
