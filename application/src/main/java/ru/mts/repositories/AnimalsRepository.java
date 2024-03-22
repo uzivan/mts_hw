@@ -7,13 +7,14 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 public interface AnimalsRepository {
 
     /**
      * @return names of animals that were born in the leap year
      */
-    Map<String, LocalDate> findLeapYearNames();
+   Map<String, LocalDate> findLeapYearNames();
 
     /**
      * @return animals that older then nYears

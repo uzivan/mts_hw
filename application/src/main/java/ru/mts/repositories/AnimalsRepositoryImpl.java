@@ -6,14 +6,13 @@ import ru.mts.domain.animals.Animal;
 import ru.mts.services.CreateAnimalService;
 import ru.mts.utils.Preconditions;
 import ru.mts.utils.exceptions.InvalidAnimalsSizeException;
-
-import javax.swing.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.security.Key;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,9 +47,12 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                                 new String(entry.getKey() + " " + animal.getName()),
                                 animal.getBirthDate())))
                 .filter(animal -> animal.getValue().isLeapYear())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (existingValue, newValue) -> existingValue, IdentityHashMap::new));
-
+                .collect(Collectors.toMap(
+                        AbstractMap.SimpleEntry::getKey,
+                        AbstractMap.SimpleEntry::getValue,
+                        (existingValue, newValue) -> existingValue,
+                        () -> Collections.synchronizedMap(new HashMap<>()))
+                );
     }
 
     @Override
@@ -73,10 +75,10 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                                 if (firstAnimal.get().getBirthDate().isBefore(LocalDate.now().minusYears(nYears))) {
                                     return list.stream().filter(animal -> animal.getBirthDate()
                                                     .isBefore(LocalDate.now().minusYears(nYears)))
-                                            .collect(Collectors.toMap(Function.identity(),
+                                            .collect(Collectors.toConcurrentMap(Function.identity(),
                                                     (Animal animal) -> LocalDate.now().getYear() - animal.getBirthDate().getYear()));
                                 } else {
-                                    Map<Animal, Integer> oldestAnimal = new HashMap<>();
+                                    ConcurrentMap<Animal, Integer> oldestAnimal = new ConcurrentHashMap<>();
 
                                     oldestAnimal.put(firstAnimal.get(), LocalDate.now().getYear() - firstAnimal.get().getBirthDate().getYear());
 
@@ -101,8 +103,8 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                                 .entrySet().stream()
                                 .filter(value -> value.getValue() > 1)
                                 .map(Map.Entry::getKey)
-                                .collect(Collectors.toList())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                                .collect(Collectors.collectingAndThen(Collectors.toList(), CopyOnWriteArrayList::new))))
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
@@ -143,7 +145,7 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                     return animal.getCost().compareTo(average) >= 0;
                 })
                 .filter(animal -> animal.getBirthDate().isBefore(LocalDate.now().minusYears(5)))
-                .collect(Collectors.toList());
+                .collect(Collectors.collectingAndThen(Collectors.toList(), CopyOnWriteArrayList::new));
     }
 
     @Override
@@ -159,7 +161,7 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                 })
                 .sorted(Comparator.comparing(Animal::getCost))
                 .limit(3).sorted(Comparator.comparing(Animal::getName))
-                .collect(Collectors.toList());
+                .collect(Collectors.collectingAndThen(Collectors.toList(), CopyOnWriteArrayList::new));
     }
 
     public void checkDateAndName(Map<String, List<Animal>> animals) {
