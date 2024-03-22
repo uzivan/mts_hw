@@ -1,17 +1,19 @@
 package ru.mts.repositories;
 
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import ru.mts.domain.animals.Animal;
 import ru.mts.services.CreateAnimalService;
 import ru.mts.utils.Preconditions;
 import ru.mts.utils.exceptions.InvalidAnimalsSizeException;
-import java.util.concurrent.ConcurrentHashMap;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,46 +43,49 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
     public Map<String, LocalDate> findLeapYearNames() {
         checkDateAndName(animals);
 
-        return animals.entrySet().stream()
-                .flatMap(entry -> entry.getValue().stream().map(
-                        animal -> new AbstractMap.SimpleEntry<>(
-                                new String(entry.getKey() + " " + animal.getName()),
-                                animal.getBirthDate())))
-                .filter(animal -> animal.getValue().isLeapYear())
+        return animals.entrySet()
+                .stream()
+                .flatMap(entry -> entry.getValue()
+                        .stream()
+                        .map(a -> new AbstractMap.SimpleEntry<>(entry.getKey() + " " + a.getName(), a.getBirthDate())))
+                .filter(a -> a.getValue().isLeapYear())
                 .collect(Collectors.toMap(
                         AbstractMap.SimpleEntry::getKey,
                         AbstractMap.SimpleEntry::getValue,
                         (existingValue, newValue) -> existingValue,
-                        () -> Collections.synchronizedMap(new HashMap<>()))
+                        ConcurrentHashMap::new)
                 );
     }
 
     @Override
     public Map<Animal, Integer> findOlderAnimal(int nYears) {
         Preconditions.checkYears(nYears > 0);
-        Preconditions.checkArgument(!Objects.isNull(animals), "Map of animals must not be null");
-        Preconditions.checkArgument(!animals.isEmpty(), "Map of animals must not be empty");
+        Preconditions.checkArgument(MapUtils.isNotEmpty(animals), "Map animal is null or empty");
+
+        final var now = LocalDate.now();
 
         return animals.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
-                .peek(animal -> {
-                    Preconditions.checkAnimalField(!Objects.isNull(animal.getBirthDate()), "Birthdate");
-                    Preconditions.checkAnimalField(!Objects.isNull(animal.getName()), "Name");
+                .peek(a -> {
+                    Preconditions.checkAnimalField(Objects.nonNull(a.getBirthDate()), "Birthdate");
+                    Preconditions.checkAnimalField(Objects.nonNull(a.getName()), "Name");
                 })
                 .sorted(Comparator.comparing(Animal::getBirthDate))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
                             Optional<Animal> firstAnimal = list.stream().findFirst();
 
                             if (firstAnimal.isPresent()) {
-                                if (firstAnimal.get().getBirthDate().isBefore(LocalDate.now().minusYears(nYears))) {
-                                    return list.stream().filter(animal -> animal.getBirthDate()
-                                                    .isBefore(LocalDate.now().minusYears(nYears)))
-                                            .collect(Collectors.toConcurrentMap(Function.identity(),
-                                                    (Animal animal) -> LocalDate.now().getYear() - animal.getBirthDate().getYear()));
+                                if (firstAnimal.get().getBirthDate().isBefore(now.minusYears(nYears))) {
+                                    return list.stream()
+                                            .filter(a -> a.getBirthDate().isBefore(now.minusYears(nYears)))
+                                            .collect(Collectors.toConcurrentMap(
+                                                    Function.identity(),
+                                                    (Animal animal) -> now.getYear() - animal.getBirthDate().getYear())
+                                            );
                                 } else {
-                                    ConcurrentMap<Animal, Integer> oldestAnimal = new ConcurrentHashMap<>();
+                                    Map<Animal, Integer> oldestAnimal = new ConcurrentHashMap<>();
 
-                                    oldestAnimal.put(firstAnimal.get(), LocalDate.now().getYear() - firstAnimal.get().getBirthDate().getYear());
+                                    oldestAnimal.put(firstAnimal.get(), now.getYear() - firstAnimal.get().getBirthDate().getYear());
 
                                     return oldestAnimal;
                                 }
@@ -93,15 +98,18 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
     @Override
     public Map<String, List<Animal>> findDuplicate() {
-        Preconditions.checkArgument(!Objects.isNull(animals), "Map of animals must not be empty");
-        Preconditions.checkArgument(!animals.isEmpty(), "Map of animals must not be empty");
+        Preconditions.checkArgument(MapUtils.isNotEmpty(animals), "Map animals is null or empty");
 
-        return animals.entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
-                        entry.getValue().stream()
+        return animals.entrySet()
+                .stream()
+                .map(entry -> new AbstractMap.SimpleEntry<>(
+                        entry.getKey(),
+                        entry.getValue()
+                                .stream()
                                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-                                .entrySet().stream()
-                                .filter(value -> value.getValue() > 1)
+                                .entrySet()
+                                .stream()
+                                .filter(value -> value.getValue() > 1L)
                                 .map(Map.Entry::getKey)
                                 .collect(Collectors.collectingAndThen(Collectors.toList(), CopyOnWriteArrayList::new))))
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -116,63 +124,77 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
 
     @Override
     public void findAverageAge(List<Animal> animals) {
-        Preconditions.checkArgument(!Objects.isNull(animals), "List of animals must not be null");
-        Preconditions.checkArgument(!animals.isEmpty(), "List of animals must not be empty");
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(animals), "List of animals is null or empty");
 
-        animals.stream()
-                .peek(animal -> {
-                    Preconditions.checkAnimalField(!Objects.isNull(animal.getBirthDate()), "Birthdate");
-                })
-                .map(animal -> LocalDate.now().getYear() - animal.getBirthDate().getYear())
-                .mapToInt(e -> e).average().stream().forEach(System.out::println);
+        // До этого на КАЖДОМ витке сравнимым с циклом создавался объект текущей даты,
+        // а что если таких "витков" 1ккк ?
+        // А главное зачем если можно 1 обойтись
+        final var now = LocalDate.now();
+
+        var result = animals.stream()
+                .peek(a -> Preconditions.checkAnimalField(Objects.nonNull(a.getBirthDate()), "Birthdate"))
+                .map(a -> now.getYear() - a.getBirthDate().getYear())
+                .mapToInt(i -> i)
+                .average()
+                .stream()
+                .mapToObj(String::valueOf)
+                .collect(Collectors.joining("\n"));
+
+        System.out.println(result);
     }
 
     @Override
     public List<Animal> findOldAndExpensive(List<Animal> animals) {
-        Preconditions.checkArgument(!Objects.isNull(animals), "List of animals must not be null");
-        Preconditions.checkArgument(!animals.isEmpty(), "List of animals must not be empty");
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(animals), "List of animals is null or empty");
+
+        final var now = LocalDate.now();
 
         return animals.stream()
                 .peek(animal -> {
-                    Preconditions.checkAnimalField(!Objects.isNull(animal.getBirthDate()), "Birthdate");
-                    Preconditions.checkAnimalField(!Objects.isNull(animal.getCost()), "Cost");
+                    Preconditions.checkAnimalField(Objects.nonNull(animal.getBirthDate()), "Birthdate");
+                    Preconditions.checkAnimalField(Objects.nonNull(animal.getCost()), "Cost");
                 })
-                .filter(animal -> {
-                    BigDecimal average = animals.stream().map(Animal::getCost).collect(Collectors.collectingAndThen(
-                            Collectors.reducing(BigDecimal.ZERO, BigDecimal::add),
-                            sum -> sum.divide(BigDecimal.valueOf(animals.size()), RoundingMode.HALF_UP)));
+                .filter(a -> {
+                    BigDecimal average = animals.stream()
+                            .map(Animal::getCost)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.collectingAndThen(
+                                    Collectors.reducing(BigDecimal.ZERO, BigDecimal::add),
+                                    // а если 'sum' или 'animals.size()' == 0 ?
+                                    sum -> sum.divide(BigDecimal.valueOf(animals.size()), RoundingMode.HALF_UP))
+                            );
 
-                    return animal.getCost().compareTo(average) >= 0;
+                    return a.getCost().compareTo(average) >= 0;
                 })
-                .filter(animal -> animal.getBirthDate().isBefore(LocalDate.now().minusYears(5)))
+                .filter(a -> a.getBirthDate().isBefore(now.minusYears(5)))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CopyOnWriteArrayList::new));
     }
 
     @Override
     public List<Animal> findMinConstAnimal(List<Animal> animals) throws InvalidAnimalsSizeException {
-        Preconditions.checkArgument(!Objects.isNull(animals), "List of animals must not be null");
-        Preconditions.checkArgument(!animals.isEmpty(), "List of animals must not be empty");
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(animals), "List of animals is null or empty");
         Preconditions.checkAnimalList(animals.size() >= 3);
 
         return animals.stream()
-                .peek(animal -> {
-                    Preconditions.checkAnimalField(!Objects.isNull(animal.getCost()), "Cost");
-                    Preconditions.checkAnimalField(!Objects.isNull(animal.getName()), "Name");
+                .peek(a -> {
+                    Preconditions.checkAnimalField(Objects.nonNull(a.getCost()), "Cost");
+                    Preconditions.checkAnimalField(Objects.nonNull(a.getName()), "Name");
                 })
                 .sorted(Comparator.comparing(Animal::getCost))
-                .limit(3).sorted(Comparator.comparing(Animal::getName))
+                .limit(3)
+                .sorted(Comparator.comparing(Animal::getName))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), CopyOnWriteArrayList::new));
     }
 
     public void checkDateAndName(Map<String, List<Animal>> animals) {
-        Preconditions.checkArgument(!Objects.isNull(animals), "Map of animals must not be null");
-        Preconditions.checkArgument(!animals.isEmpty(), "Map of animals must not be empty");
+        Preconditions.checkArgument(MapUtils.isNotEmpty(animals), "List of animals is null or empty");
 
         for (Map.Entry<String, List<Animal>> animalMapElement : animals.entrySet()) {
             for (Animal animal : animalMapElement.getValue()) {
-                Preconditions.checkAnimalField(!Objects.isNull(animal.getBirthDate()), "Birthdate");
-                Preconditions.checkAnimalField(!Objects.isNull(animal.getName()), "Name");
+                Preconditions.checkAnimalField(Objects.nonNull(animal.getBirthDate()), "Birthdate");
+                Preconditions.checkAnimalField(Objects.nonNull(animal.getName()), "Name");
             }
         }
     }
+
 }
