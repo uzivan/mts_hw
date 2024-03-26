@@ -26,7 +26,7 @@ public interface AnimalsRepository {
      */
     Map<String, List<Animal>> findDuplicate();
 
-    void printDuplicates(Collection<Animal> animals);
+    void printDuplicates();
 
     public void findAverageAge(List<Animal> animals);
 

@@ -5,6 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import ru.mts.domain.animals.Animal;
+import ru.mts.factory.SimpleFactoryFunctions;
 import ru.mts.services.CreateAnimalService;
 import ru.mts.utils.Preconditions;
 import ru.mts.utils.exceptions.InvalidAnimalsSizeException;
@@ -37,6 +38,7 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
         }
 
         animals = service.createAnimals(n);
+        SimpleFactoryFunctions.createRandomAnimals(animals, 2);
     }
 
     @Override
@@ -116,9 +118,15 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
     }
 
     @Override
-    public void printDuplicates(Collection<Animal> animals) {
-        for (Animal animal : animals) {
-            System.out.println(animal);
+    public void printDuplicates() {
+        Map<String, List<Animal>> animals = findDuplicate();
+
+        for(Map.Entry<String, List<Animal>> animalMapElement: animals.entrySet()){
+            System.out.println(animalMapElement.getKey());
+
+            for (Animal animal : animalMapElement.getValue()) {
+                System.out.println(animal);
+            }
         }
     }
 
@@ -126,9 +134,6 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
     public void findAverageAge(List<Animal> animals) {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(animals), "List of animals is null or empty");
 
-        // До этого на КАЖДОМ витке сравнимым с циклом создавался объект текущей даты,
-        // а что если таких "витков" 1ккк ?
-        // А главное зачем если можно 1 обойтись
         final var now = LocalDate.now();
 
         var result = animals.stream()
@@ -160,7 +165,6 @@ public class AnimalsRepositoryImpl implements AnimalsRepository {
                             .filter(Objects::nonNull)
                             .collect(Collectors.collectingAndThen(
                                     Collectors.reducing(BigDecimal.ZERO, BigDecimal::add),
-                                    // а если 'sum' или 'animals.size()' == 0 ?
                                     sum -> sum.divide(BigDecimal.valueOf(animals.size()), RoundingMode.HALF_UP))
                             );
 

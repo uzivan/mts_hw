@@ -7,12 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.ReflectionUtils;
 import ru.mts.config.ConfigApp;
 import ru.mts.domain.animals.Animal;
-import ru.mts.domain.animals.animalsExt.pets.petsExt.Cat;
 import ru.mts.domain.animals.animalsExt.pets.petsExt.Dog;
-import ru.mts.domain.animals.animalsExt.predators.predatorsExt.Panda;
-import ru.mts.domain.animals.animalsExt.predators.predatorsExt.Wolf;
 
 import ru.mts.factory.SimpleFactory;
+import ru.mts.factory.SimpleFactoryFunctions;
 import ru.mts.utils.exceptions.IncorrectYearsException;
 import ru.mts.utils.exceptions.InvalidAnimalsSizeException;
 import ru.mts.utils.exceptions.NullAnimalFieldException;
@@ -23,10 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
